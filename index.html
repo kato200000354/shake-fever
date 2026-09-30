@@ -188,7 +188,7 @@ button:focus-visible{outline:4px solid #fff;outline-offset:3px}
 .btn-home svg{width:28px;height:28px}
 
 /* ===== 設定 ===== */
-.sheet{text-align:left}
+.sheet{text-align:left;max-height:100%;overflow:auto}
 .sheet h2{text-align:center;font-size:1.8rem;--sw:7px;--sd:4px}
 .fld{display:flex;flex-direction:column;gap:6px}
 .fld > span{font-weight:900;font-size:.95rem}
@@ -229,10 +229,10 @@ button:focus-visible{outline:4px solid #fff;outline-offset:3px}
     <div class="ribbon-title">あそびかた</div>
     <div class="panel">
       <div class="step"><div class="no">1</div>
-        <div><h3 id="step1h">5秒間、上下にふろう！</h3><p id="step1p">スマホを缶に見立てて、ひたすら上下にふります。強く速くふるほど圧力がたまります。</p></div>
+        <div><h3 id="step1h">10秒間、上下にふろう！</h3><p id="step1p">スマホを缶に見立てて、ひたすら上下にふります。強く速くふるほど圧力がたまります。</p></div>
         <div class="illo" id="illo1"></div></div>
       <div class="step"><div class="no">2</div>
-        <div><h3>フタをあけよう！</h3><p id="step2p">5秒たったら、自分の缶をタップしてフタを開けます。</p></div>
+        <div><h3>フタをあけよう！</h3><p id="step2p">10秒たったら、自分の缶をタップしてフタを開けます。</p></div>
         <div class="illo" id="illo2"></div></div>
       <div class="step"><div class="no">3</div>
         <div><h3>どれだけ飛ぶか競おう！</h3><p>ジュースの噴き出す高さ（最高5.0m）で順位が決まります。</p></div>
@@ -302,6 +302,9 @@ button:focus-visible{outline:4px solid #fff;outline-offset:3px}
       <div class="fld"><span>操作方法</span>
         <div class="seg" id="segInput"><button data-v="shake">スマホをふる</button><button data-v="swipe">スワイプ</button></div>
         <small id="inputNote"></small></div>
+      <div class="fld"><span>ふる時間</span>
+        <div class="seg" id="segSec"><button data-v="5">5秒</button><button data-v="10">10秒</button><button data-v="15">15秒</button></div>
+        <small>長いほど体力勝負！ゲージのたまり方は時間に合わせて変わります。</small></div>
       <div class="fld"><span>サウンド</span>
         <div class="seg" id="segSound"><button data-v="on">ON</button><button data-v="off">OFF</button></div></div>
       <button class="btn-blue" id="btnCloseSet">OK</button>
@@ -323,7 +326,7 @@ const COLORS = [
   { c:'#35c24f', d:'#157d2b', foam:'#e0ffdc' },
   { c:'#ffb81c', d:'#c47400', foam:'#fff4c9' },
 ];
-const SHAKE_SEC = 5;
+let SHAKE_SEC = 10;
 const MAX_M = 5;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -393,6 +396,7 @@ const S = {
   humans: clamp(store.get('humans', 1), 1, 4),
   input: store.get('input', coarse ? 'shake' : 'swipe'),
   sound: store.get('sound', true),
+  sec: [5, 10, 15].includes(store.get('sec', 10)) ? store.get('sec', 10) : 10,
   screen: 'title',
   token: 0,
 };
@@ -400,16 +404,17 @@ function syncSettingsUI() {
   for (const b of document.querySelectorAll('#segPlayers button')) b.setAttribute('aria-pressed', String(+b.dataset.v === S.humans));
   for (const b of document.querySelectorAll('#segInput button')) b.setAttribute('aria-pressed', String(b.dataset.v === S.input));
   for (const b of document.querySelectorAll('#segSound button')) b.setAttribute('aria-pressed', String((b.dataset.v === 'on') === S.sound));
+  for (const b of document.querySelectorAll('#segSec button')) b.setAttribute('aria-pressed', String(+b.dataset.v === S.sec));
   $('#inputNote').textContent = S.input === 'shake'
     ? (S.humans > 1 ? 'スマホ1台を順番にまわして、1人ずつふります。' : 'スマホ本体を上下にふります。')
     : '画面のレーンを上下にこすります。複数人なら同時にプレイ！';
   const com = 4 - S.humans;
-  $('#cfgText').textContent = `${S.humans}人${com ? ` + COM${com}` : ''}・${S.input === 'shake' ? 'スマホをふる' : 'スワイプ'}`;
+  $('#cfgText').textContent = `${S.humans}人${com ? ` + COM${com}` : ''}・${S.input === 'shake' ? 'スマホをふる' : 'スワイプ'}・${S.sec}秒`;
   const shake = S.input === 'shake';
-  $('#step1h').textContent = shake ? '5秒間、上下にふろう！' : '5秒間、上下にこすろう！';
+  $('#step1h').textContent = shake ? `${S.sec}秒間、上下にふろう！` : `${S.sec}秒間、上下にこすろう！`;
   $('#step1p').textContent = shake ? 'スマホを缶に見立てて、ひたすら上下にふります。強く速くふるほど圧力がたまります。'
     : '自分のレーンを指でひたすら上下にこすります。速く大きく動かすほど圧力がたまります。';
-  $('#step2p').textContent = shake && S.humans === 1 ? '5秒たったら、画面をタップするか手首をひねってフタを開けます。' : '5秒たったら、自分の缶をタップしてフタを開けます。';
+  $('#step2p').textContent = shake && S.humans === 1 ? `${S.sec}秒たったら、画面をタップするか手首をひねってフタを開けます。` : `${S.sec}秒たったら、自分の缶をタップしてフタを開けます。`;
   $('#safety').hidden = !shake;
 }
 function bindSeg(sel, fn) {
@@ -418,6 +423,7 @@ function bindSeg(sel, fn) {
 bindSeg('#segPlayers', v => { S.humans = +v; store.set('humans', S.humans); });
 bindSeg('#segInput', v => { S.input = v; store.set('input', v); });
 bindSeg('#segSound', v => { S.sound = v === 'on'; store.set('sound', S.sound); });
+bindSeg('#segSec', v => { S.sec = +v; store.set('sec', S.sec); });
 syncSettingsUI();
 
 /* ---------- サウンド（WebAudioで合成） ---------- */
@@ -497,7 +503,7 @@ function onMotion(e) {
 let G = null;
 const lanesEl = $('#lanes');
 function addEnergy(i, v) { const p = G.players[i]; if (p) p.energy += v; }
-const pressureOf = e => 1 - Math.exp(-e / 60);
+const pressureOf = e => 1 - Math.exp(-e / (12 * SHAKE_SEC));
 
 function show(name) {
   S.screen = name;
@@ -539,6 +545,7 @@ function setFace(p, face) {
 
 async function startGame() {
   const tok = ++S.token;
+  SHAKE_SEC = S.sec;
   const ok = () => tok === S.token;
   fizzStop();
   G = {
@@ -548,7 +555,7 @@ async function startGame() {
       const target = rand(0.42, 0.86);
       return { idx: i, human, tag: human ? `${i + 1}P` : 'COM', name: human ? `プレイヤー${i + 1}` : `COM${i + 1 - S.humans}`,
         energy: 0, lastE: 0, int: 0, pressure: 0, opened: false, openAt: 0, distance: 0, shown: 0,
-        cpuRate: -60 * Math.log(1 - target) / SHAKE_SEC, cpuOpen: rand(0.5, 1.6), cpuDone: false, drops: 0 };
+        cpuRate: -12 * Math.log(1 - target), cpuOpen: rand(0.5, 1.6), cpuDone: false, drops: 0 };
     }),
   };
   $('#scr-game').classList.remove('spray', 'fever');
