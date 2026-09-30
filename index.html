@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#1f6fe5">
+<title>シェイク・フィーバー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0b2a6b; --navy2:#16409a; --blue:#1f6fe5; --sky:#5cc8ff;
+  --yellow:#ffd23a; --yellow2:#ffb400; --red:#ee2b3b; --paper:#eef5ff; --white:#fff;
+  --font:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","BIZ UDPGothic","Meiryo",sans-serif;
+  color-scheme:light;
+}
+html{height:100%;box-sizing:border-box;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);background:#07204f}
+*,*::before,*::after{box-sizing:border-box}
+body{height:100%;margin:0;background:#07204f;font-family:var(--font);color:var(--navy);
+  overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+button{font-family:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:4px solid #fff;outline-offset:3px}
+#app{position:relative;height:100%;max-width:480px;margin:0 auto;overflow:hidden;background:var(--blue);touch-action:manipulation}
+@media (min-width:520px){#app{box-shadow:0 0 0 4px var(--navy),0 24px 70px rgba(0,0,0,.55)}}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column}
+#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+
+/* 背景の集中線 */
+.burst{position:absolute;inset:0;z-index:0;overflow:hidden;
+  background:radial-gradient(circle at 50% 42%,#9ce6ff 0,#3aa8ff 28%,#1f6fe5 58%,#0e3a9a 100%)}
+.burst::before{content:"";position:absolute;inset:-60%;
+  background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.14) 0 6deg,rgba(255,255,255,0) 6deg 13deg);
+  animation:spin 60s linear infinite}
+.burst::after{content:"";position:absolute;inset:0;opacity:0;transition:opacity .25s;
+  background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.55) 0,rgba(255,255,255,0) 40%),
+    conic-gradient(from 0deg at 50% 45%,#ff3d7a,#ff9a1f,#ffe23a,#34d27b,#27b3ff,#8a5cff,#ff3d7a)}
+.fever .burst::after{opacity:.92}
+.fever .burst::before{animation-duration:4s;z-index:1}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* 縁取り文字 */
+.pop{color:var(--yellow);-webkit-text-stroke:var(--sw,6px) var(--navy);paint-order:stroke fill;
+  text-shadow:0 var(--sd,6px) 0 var(--navy);font-weight:900;letter-spacing:.02em}
+
+/* ボタン */
+.btn-yellow{border:4px solid var(--navy);border-radius:999px;background:linear-gradient(#fff07a,var(--yellow) 45%,var(--yellow2));
+  box-shadow:0 6px 0 var(--navy),inset 0 -5px 0 rgba(200,110,0,.35);font-weight:900;color:var(--navy);padding:.35em 1.4em;
+  transition:transform .08s}
+.btn-yellow:active{transform:translateY(4px);box-shadow:0 2px 0 var(--navy)}
+.btn-blue{border:3px solid #fff;border-radius:999px;background:linear-gradient(#3e8cff,#1656d6);color:#fff;font-weight:900;
+  box-shadow:0 5px 0 var(--navy);padding:.7em 1em;font-size:1.1rem}
+.btn-blue:active{transform:translateY(3px);box-shadow:0 2px 0 var(--navy)}
+
+/* ===== タイトル ===== */
+.title{align-items:center;padding:14px 16px 22px}
+.title .grass{position:absolute;left:0;right:0;bottom:0;height:30%;z-index:0;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 34px,rgba(0,0,0,0) 34px 68px),linear-gradient(#63d352,#2f9e3c)}
+.title .grass::before{content:"";position:absolute;left:-10%;right:-10%;top:-26px;height:52px;border-radius:50%;background:#63d352}
+.bunting{position:relative;z-index:1;width:112%;margin-inline:-6%;height:44px;display:block}
+.logo{position:relative;z-index:2;text-align:center;transform:rotate(-7deg);margin-top:4px;line-height:1}
+.logo .t1{font-size:clamp(3rem,15vw,4.6rem);--sw:9px;--sd:8px;margin-right:22%}
+.logo .t2{font-size:clamp(3.2rem,16vw,4.9rem);--sw:9px;--sd:8px;color:#ffc21a;margin-left:12%;margin-top:-.1em}
+.logo .bang{color:var(--red)}
+.ribbon{display:inline-block;margin-top:.55rem;background:linear-gradient(#2a6ee8,#123f9f);color:#fff;font-weight:900;
+  font-size:clamp(.95rem,4.4vw,1.2rem);padding:.35em 1.1em;border-radius:12px;border:3px solid #fff;box-shadow:0 4px 0 var(--navy);transform:rotate(3deg)}
+.hero{position:relative;z-index:2;flex:1;min-height:0;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.hero .main{width:min(46%,210px);animation:bob 1.1s ease-in-out infinite;filter:drop-shadow(0 10px 0 rgba(8,30,90,.35))}
+.hero .side{position:absolute;bottom:4%;width:min(19%,86px)}
+.hero .s1{left:2%;transform:rotate(-10deg)} .hero .s2{right:17%;bottom:8%;transform:rotate(6deg)} .hero .s3{right:1%;transform:rotate(12deg)}
+.hero svg{display:block;width:100%}
+@keyframes bob{50%{transform:translateY(-10px) rotate(3deg)}}
+.title-foot{position:relative;z-index:2;width:100%;display:flex;align-items:center;justify-content:center;margin-top:14px}
+#btnStart{font-size:clamp(2rem,10vw,2.6rem);min-width:62%}
+.gear{position:absolute;left:0;bottom:4px;width:54px;height:54px;border-radius:50%;border:3px solid #fff;
+  background:linear-gradient(#3e8cff,#1656d6);display:grid;place-items:center;box-shadow:0 4px 0 var(--navy)}
+.gear svg{width:30px;height:30px}
+
+/* ===== あそびかた ===== */
+.howto{padding:16px;gap:12px;background:linear-gradient(#2a7bf0,#1450c4)}
+.ribbon-title{align-self:center;background:linear-gradient(#3e8cff,#1656d6);color:#fff;font-weight:900;font-size:1.6rem;
+  padding:.2em 1.6em;border-radius:999px;border:3px solid #fff;box-shadow:0 5px 0 var(--navy);letter-spacing:.1em}
+.panel{position:relative;z-index:1;background:#fff;border-radius:24px;border:4px solid #bcd6ff;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.howto .panel{flex:1;overflow:auto}
+.step{display:grid;grid-template-columns:36px 1fr 84px;gap:10px;align-items:center;background:var(--paper);border-radius:16px;padding:10px 10px 10px 12px}
+.step .no{width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;font-weight:900;font-size:1.2rem;display:grid;place-items:center;box-shadow:0 3px 0 var(--navy)}
+.step h3{margin:0;color:var(--blue);font-size:1.12rem;font-weight:900;line-height:1.35;text-wrap:balance}
+.step p{margin:4px 0 0;font-size:.8rem;font-weight:500;line-height:1.55}
+.illo{display:flex;align-items:center;justify-content:center;gap:2px;height:84px}
+.illo svg{height:100%;width:auto}
+.illo .arr{height:70%}
+.cfg{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:#fff7d6;border:3px dashed #f3c200;border-radius:14px;padding:8px 12px;font-weight:800;font-size:.9rem}
+.cfg button{border:3px solid var(--navy2);background:#fff;border-radius:999px;padding:4px 14px;font-weight:800}
+.note{margin:0;font-size:.78rem;font-weight:800;color:#c0182a;text-align:center}
+#btnGo{font-size:1.25rem;padding:.8em 1em}
+
+/* ===== ゲーム ===== */
+.game{padding:12px 16px;gap:10px;touch-action:none}
+.g-top{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.phase-pill{background:linear-gradient(#3170e8,#143f9f);color:#fff;font-weight:900;font-size:clamp(1.1rem,5.6vw,1.45rem);
+  padding:.25em .9em;border-radius:999px;border:3px solid rgba(255,255,255,.9);box-shadow:0 4px 0 rgba(8,30,90,.55);white-space:nowrap}
+.timer{display:flex;align-items:center;gap:6px;background:linear-gradient(#123f9f,#0b2a6b);color:#fff;border:3px solid #fff;border-radius:999px;padding:3px 14px 3px 12px;box-shadow:0 4px 0 rgba(8,30,90,.55)}
+.timer small{font-size:.62rem;font-weight:800;line-height:1.15}
+.timer b{font-size:1.7rem;font-weight:900;font-variant-numeric:tabular-nums;min-width:2.3ch;text-align:right}
+.lanes{position:relative;z-index:3;flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.lane{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding-bottom:10px;border-radius:18px;min-height:0;
+  background:linear-gradient(color-mix(in srgb,var(--c) 55%,transparent),color-mix(in srgb,var(--c) 18%,transparent));
+  border:3px solid rgba(255,255,255,.45);transition:opacity .2s,filter .2s}
+.lane.active{border-color:#fff;box-shadow:0 0 0 3px var(--yellow),0 0 26px rgba(255,210,58,.8)}
+.lane.dim{opacity:.5;filter:saturate(.5)}
+.lane-head{width:100%;text-align:center;background:var(--c);color:#fff;font-weight:900;font-size:1.25rem;border-radius:14px 14px 8px 8px;
+  -webkit-text-stroke:4px var(--navy);paint-order:stroke fill;padding:2px 0;border-bottom:3px solid rgba(8,30,90,.35)}
+.can-wrap{position:relative;width:84%;flex:none}
+.can{will-change:transform}
+.can svg{display:block;width:100%;filter:drop-shadow(0 5px 0 rgba(8,30,90,.3))}
+.tap-bubble{position:absolute;left:50%;top:-14px;transform:translateX(-50%);background:var(--yellow);border:3px solid var(--navy);border-radius:10px;
+  font-weight:900;font-size:.85rem;padding:1px 8px;white-space:nowrap;display:none;animation:bounce .5s ease-in-out infinite alternate}
+.need-open .tap-bubble{display:block}
+@keyframes bounce{to{transform:translate(-50%,-6px)}}
+.gauge{position:relative;flex:1;min-height:40px;width:50%;border-radius:999px;background:rgba(255,255,255,.4);border:3px solid #fff;overflow:hidden;
+  box-shadow:inset 0 4px 8px rgba(8,30,90,.3),0 3px 0 rgba(8,30,90,.3)}
+.fill{position:absolute;left:0;right:0;bottom:0;height:0%;
+  background:radial-gradient(circle,rgba(255,255,255,.75) 0 2px,transparent 3px) 0 0/12px 16px,
+    linear-gradient(to top,var(--cd),var(--c) 55%,color-mix(in srgb,var(--c) 55%,#fff));
+  animation:bubbles 1s linear infinite;border-radius:0 0 999px 999px}
+@keyframes bubbles{to{background-position:0 -16px,0 0}}
+.ticks{position:absolute;inset:0;background:repeating-linear-gradient(to top,transparent 0 calc(20% - 2px),rgba(255,255,255,.7) calc(20% - 2px) 20%)}
+.podium{display:none;width:100%;flex-direction:column;align-items:center;gap:2px;background:linear-gradient(var(--c),var(--cd));
+  border:3px solid var(--navy);border-radius:12px;padding:6px 2px 8px;box-shadow:0 5px 0 rgba(8,30,90,.5)}
+.podium .rk{font-size:clamp(1.3rem,6.4vw,1.8rem);font-weight:900;color:var(--yellow);-webkit-text-stroke:5px var(--navy);paint-order:stroke fill;line-height:1.1}
+.podium .dist{font-size:clamp(.85rem,4vw,1.05rem);font-weight:900;color:#fff;background:rgba(8,30,90,.55);border-radius:8px;padding:0 6px;font-variant-numeric:tabular-nums}
+.stage{position:absolute;left:0;right:0;bottom:0;height:0;z-index:1;transition:height .3s;
+  background:linear-gradient(#e7b56a 0 14px,#b9793a 14px 18px,#d49a55 18px);border-top:4px solid var(--navy)}
+.game.spray .stage{height:26%}
+.game.spray .lane{justify-content:flex-end;background:none;border-color:transparent;box-shadow:none;opacity:1;filter:none}
+.game.spray .gauge{display:none}
+.game.spray .lane-head{display:none}
+.game.spray .podium{display:flex}
+.game.spray .timer{visibility:hidden}
+.game.spray .burst{background:radial-gradient(circle at 50% 30%,#bdf0ff 0,#5cc3ff 40%,#2a86ee 100%)}
+.g-bottom{position:relative;z-index:3;display:flex;justify-content:center}
+.hint{display:flex;align-items:center;gap:10px;background:rgba(10,36,100,.85);border:3px solid rgba(255,255,255,.85);border-radius:18px;
+  color:#fff;font-weight:800;font-size:clamp(.9rem,4.2vw,1.05rem);padding:8px 16px;width:100%;justify-content:center;line-height:1.35}
+.hint svg{width:30px;height:42px;flex:none}
+#btnResult{font-size:1.5rem;width:100%}
+.big{position:absolute;left:0;right:0;top:44%;z-index:4;text-align:center;pointer-events:none;transform:translateY(-50%)}
+.big span{display:inline-block;color:var(--yellow);-webkit-text-stroke:12px var(--navy);paint-order:stroke fill;text-shadow:0 9px 0 var(--navy);font-weight:900;line-height:1}
+.big.num span{font-size:clamp(7rem,40vw,10rem);animation:numPop 1s ease-out forwards}
+.big.word span{font-size:clamp(2.6rem,13vw,3.6rem);animation:wordPop .5s cubic-bezier(.2,1.6,.4,1) both;-webkit-text-stroke:10px var(--navy)}
+.big.word.warn span{color:#fff27a;transform:rotate(-6deg)}
+@keyframes numPop{0%{transform:scale(.3);opacity:0}15%{transform:scale(1.15);opacity:1}30%{transform:scale(1)}100%{transform:scale(.94);opacity:.35}}
+@keyframes wordPop{0%{transform:scale(.2);opacity:0}100%{transform:scale(1);opacity:1}}
+.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:6}
+.flash.on{animation:flash .45s ease-out}
+@keyframes flash{0%{opacity:.95}100%{opacity:0}}
+.overlay{position:absolute;inset:0;z-index:8;display:grid;place-items:center;padding:16px;background:rgba(7,28,80,.72)}
+.card{background:#fff;border-radius:24px;border:4px solid var(--navy);padding:22px 18px;width:100%;max-width:360px;text-align:center;display:flex;flex-direction:column;gap:12px;box-shadow:0 8px 0 rgba(0,0,0,.3)}
+.card h2{margin:0;font-size:2.4rem;--sw:8px;--sd:5px}
+.card p{margin:0;font-weight:800;line-height:1.6}
+.toast{position:absolute;left:16px;right:16px;top:70px;z-index:9;background:#fff;border:3px solid var(--navy);border-radius:14px;padding:10px 14px;
+  font-weight:800;font-size:.9rem;text-align:center;box-shadow:0 5px 0 rgba(0,0,0,.25)}
+
+/* ===== 結果 ===== */
+.result{padding:16px;gap:12px;align-items:stretch}
+.result .burst{background:radial-gradient(circle at 50% 20%,#d8f6ff 0,#7fd3ff 35%,#3a95f0 100%)}
+.res-head{position:relative;z-index:1;text-align:center;margin-top:6px}
+.res-head svg{width:56px;height:40px;display:block;margin:0 auto -8px}
+.res-head h2{margin:0;font-size:clamp(2.6rem,13vw,3.4rem);--sw:9px;--sd:7px;transform:rotate(-3deg)}
+.res-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.res-list li{display:grid;grid-template-columns:52px 28px 1fr auto;align-items:center;gap:10px;padding:8px 10px;border-radius:14px;background:var(--paper)}
+.res-list li:first-child{background:#fff4c7;box-shadow:inset 0 0 0 3px #ffd23a}
+.res-list .rb{font-weight:900;font-size:1.15rem;text-align:center;color:#fff;background:var(--c);border:3px solid var(--navy);border-radius:10px;-webkit-text-stroke:3px var(--navy);paint-order:stroke fill}
+.res-list .mini svg{display:block;width:100%}
+.res-list .nm{font-weight:800;font-size:1rem}
+.res-list .nm small{display:block;font-size:.7rem;color:#5a6f9c;font-weight:800}
+.res-list .d{font-weight:900;font-size:1.6rem;font-variant-numeric:tabular-nums}
+.res-list .d small{font-size:.9rem;margin-left:2px}
+.best{display:grid;grid-template-columns:auto 44px 1fr;align-items:center;gap:12px;background:linear-gradient(#fff3b0,#ffd95a);border:4px solid #f0b400;border-radius:18px;padding:10px 14px}
+.best .lbl{font-weight:900;color:#b25a00;font-size:.95rem;line-height:1.2;text-align:center}
+.best .v{font-weight:900;font-size:2.4rem;text-align:right;font-variant-numeric:tabular-nums;line-height:1}
+.best .v small{font-size:1.2rem}
+.best .sub{grid-column:1/-1;text-align:center;font-weight:800;font-size:.85rem;color:#8a4a00}
+.best .sub.new{color:#e0142c}
+.res-actions{position:relative;z-index:1;display:grid;grid-template-columns:1fr 84px;gap:12px;margin-top:auto}
+#btnAgain{font-size:1.7rem}
+.btn-home{border:3px solid #fff;border-radius:18px;background:linear-gradient(#3e8cff,#1656d6);color:#fff;font-weight:900;font-size:.8rem;box-shadow:0 5px 0 var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.btn-home svg{width:28px;height:28px}
+
+/* ===== 設定 ===== */
+.sheet{text-align:left}
+.sheet h2{text-align:center;font-size:1.8rem;--sw:7px;--sd:4px}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld > span{font-weight:900;font-size:.95rem}
+.fld small{font-weight:500;font-size:.75rem;color:#44598a;line-height:1.5}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;border:3px solid var(--navy2);background:#fff;border-radius:12px;padding:9px 0;font-weight:900;font-size:.95rem}
+.seg button[aria-pressed="true"]{background:var(--yellow);box-shadow:inset 0 -4px 0 rgba(200,110,0,.35)}
+
+@media (prefers-reduced-motion:reduce){
+  .burst::before,.hero .main,.fill,.tap-bubble{animation:none}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- タイトル -->
+  <section class="screen title" id="scr-title">
+    <div class="burst"></div>
+    <div class="grass"></div>
+    <svg class="bunting" id="bunting" viewBox="0 0 400 44" preserveAspectRatio="none" aria-hidden="true"></svg>
+    <div class="logo">
+      <div class="t1 pop">シェイク・</div>
+      <div class="t2 pop">フィーバー<span class="bang">!</span></div>
+      <div class="ribbon">ふって！あけて！どこまで飛ぶ!?</div>
+    </div>
+    <div class="hero" id="hero"></div>
+    <div class="title-foot">
+      <button class="gear" id="btnGear" aria-label="設定">
+        <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M19.4 13a7.7 7.7 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.3 7.3 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.3 7.3 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.7 7.7 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1l.4 2.6h4l.4-2.6c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>
+      </button>
+      <button class="btn-yellow" id="btnStart">スタート ▶</button>
+    </div>
+  </section>
+
+  <!-- あそびかた -->
+  <section class="screen howto" id="scr-howto" hidden>
+    <div class="ribbon-title">あそびかた</div>
+    <div class="panel">
+      <div class="step"><div class="no">1</div>
+        <div><h3 id="step1h">5秒間、上下にふろう！</h3><p id="step1p">スマホを缶に見立てて、ひたすら上下にふります。強く速くふるほど圧力がたまります。</p></div>
+        <div class="illo" id="illo1"></div></div>
+      <div class="step"><div class="no">2</div>
+        <div><h3>フタをあけよう！</h3><p id="step2p">5秒たったら、自分の缶をタップしてフタを開けます。</p></div>
+        <div class="illo" id="illo2"></div></div>
+      <div class="step"><div class="no">3</div>
+        <div><h3>どれだけ飛ぶか競おう！</h3><p>ジュースの噴き出す高さ（最高5.0m）で順位が決まります。</p></div>
+        <div class="illo" id="illo3"></div></div>
+      <div class="cfg"><span id="cfgText"></span><button id="btnCfg">設定を変える</button></div>
+      <p class="note" id="safety">スマホはしっかり握って！まわりに人や物がないか確認しよう</p>
+    </div>
+    <button class="btn-blue" id="btnGo">タップしてはじめる</button>
+  </section>
+
+  <!-- ゲーム -->
+  <section class="screen game" id="scr-game" hidden>
+    <div class="burst"></div>
+    <div class="stage"></div>
+    <header class="g-top">
+      <div class="phase-pill" id="phaseLabel">シェイク中…</div>
+      <div class="timer"><small>のこり<br>時間</small><b id="timerVal">5.0</b><small>秒</small></div>
+    </header>
+    <div class="lanes" id="lanes"></div>
+    <div class="g-bottom">
+      <div class="hint" id="hint">
+        <svg viewBox="0 0 30 42" aria-hidden="true"><rect x="4" y="2" width="22" height="38" rx="5" fill="#fff" stroke="#0b2a6b" stroke-width="2.5"/><rect x="7.5" y="7" width="15" height="26" rx="2" fill="#5cc8ff"/><path d="M1 12 v18 M29 12 v18" stroke="#ffd23a" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <span id="hintText"></span>
+      </div>
+      <button class="btn-yellow" id="btnResult" hidden>結果発表へ ▶</button>
+    </div>
+    <div class="big" id="big"></div>
+    <div class="flash" id="flash"></div>
+    <div class="overlay" id="turnOv" hidden>
+      <div class="card">
+        <h2 class="pop" id="turnTitle">2Pの番！</h2>
+        <p id="turnMsg">スマホを2Pにわたしてね。<br>しっかり握ったら準備OK！</p>
+        <button class="btn-yellow" id="btnTurn" style="font-size:1.4rem">準備OK！</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 結果 -->
+  <section class="screen result" id="scr-result" hidden>
+    <div class="burst"></div>
+    <div class="res-head">
+      <svg viewBox="0 0 56 40" aria-hidden="true"><path d="M4 34 L8 10 L19 22 L28 4 L37 22 L48 10 L52 34 Z" fill="#ffd23a" stroke="#0b2a6b" stroke-width="3.5" stroke-linejoin="round"/><circle cx="28" cy="24" r="3.5" fill="#ee2b3b"/></svg>
+      <h2 class="pop">結果発表!</h2>
+    </div>
+    <div class="panel">
+      <ol class="res-list" id="resList"></ol>
+      <div class="best">
+        <div class="lbl">今回の<br>ベスト</div>
+        <div class="mini" id="bestCan"></div>
+        <div class="v" id="bestVal">0.0<small>m</small></div>
+        <div class="sub" id="bestSub"></div>
+      </div>
+    </div>
+    <div class="res-actions">
+      <button class="btn-yellow" id="btnAgain">もう一回!</button>
+      <button class="btn-home" id="btnHome"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg>ホーム</button>
+    </div>
+  </section>
+
+  <!-- 設定 -->
+  <div class="overlay" id="settings" hidden>
+    <div class="card sheet">
+      <h2 class="pop">せってい</h2>
+      <div class="fld"><span>あそぶ人数</span>
+        <div class="seg" id="segPlayers"><button data-v="1">1人</button><button data-v="2">2人</button><button data-v="3">3人</button><button data-v="4">4人</button></div>
+        <small>4人に足りない分はCOMが参加します。</small></div>
+      <div class="fld"><span>操作方法</span>
+        <div class="seg" id="segInput"><button data-v="shake">スマホをふる</button><button data-v="swipe">スワイプ</button></div>
+        <small id="inputNote"></small></div>
+      <div class="fld"><span>サウンド</span>
+        <div class="seg" id="segSound"><button data-v="on">ON</button><button data-v="off">OFF</button></div></div>
+      <button class="btn-blue" id="btnCloseSet">OK</button>
+    </div>
+  </div>
+
+  <canvas id="fx"></canvas>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const NAVY = '#0b2a6b';
+const FONT = '"M PLUS Rounded 1c","Hiragino Maru Gothic ProN",sans-serif';
+const COLORS = [
+  { c:'#ef3340', d:'#a3121f', foam:'#ffe0e4' },
+  { c:'#2a7cf0', d:'#1446a8', foam:'#dcefff' },
+  { c:'#35c24f', d:'#157d2b', foam:'#e0ffdc' },
+  { c:'#ffb81c', d:'#c47400', foam:'#fff4c9' },
+];
+const SHAKE_SEC = 5;
+const MAX_M = 5;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const rand = (a, b) => a + Math.random() * (b - a);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+/* ---------- 保存（使えない環境でも動くように） ---------- */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('shakeFever.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('shakeFever.' + k, JSON.stringify(v)); } catch {} },
+};
+
+/* ---------- 缶キャラ ---------- */
+let uid = 0;
+function canSVG(col, face = 'idle', opened = false) {
+  const id = 'cg' + (uid++);
+  let eyes, mouth;
+  if (face === 'strain') {
+    eyes = `<path d="M29 57 L41 64 L29 71 M71 57 L59 64 L71 71" fill="none" stroke="${NAVY}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+    mouth = `<path d="M36 78 Q50 74 64 78 Q61 97 50 97 Q39 97 36 78Z" fill="#7a1020" stroke="${NAVY}" stroke-width="3.5" stroke-linejoin="round"/><path d="M39 79 Q50 76.5 61 79 L60 83 Q50 81 40 83Z" fill="#fff"/>`;
+  } else if (face === 'happy') {
+    eyes = `<path d="M28 67 Q35.5 55 43 67 M57 67 Q64.5 55 72 67" fill="none" stroke="${NAVY}" stroke-width="4.5" stroke-linecap="round"/>`;
+    mouth = `<path d="M32 76 L68 76 Q66 101 50 101 Q34 101 32 76Z" fill="#7a1020" stroke="${NAVY}" stroke-width="3.5" stroke-linejoin="round"/><ellipse cx="50" cy="93" rx="9.5" ry="5.5" fill="#ff7a8a"/>`;
+  } else {
+    eyes = `<ellipse cx="37" cy="63" rx="7.5" ry="9" fill="#fff" stroke="${NAVY}" stroke-width="3"/><ellipse cx="63" cy="63" rx="7.5" ry="9" fill="#fff" stroke="${NAVY}" stroke-width="3"/><circle cx="38.5" cy="65" r="3.8" fill="${NAVY}"/><circle cx="64.5" cy="65" r="3.8" fill="${NAVY}"/>`;
+    mouth = `<path d="M39 80 Q50 92 61 80" fill="none" stroke="${NAVY}" stroke-width="4" stroke-linecap="round"/>`;
+  }
+  const tab = opened
+    ? `<ellipse cx="50" cy="22" rx="9" ry="3.4" fill="#3b2626"/><g transform="rotate(-60 60 21)"><rect x="52" y="17" width="18" height="7" rx="3.5" fill="#aab6c6" stroke="${NAVY}" stroke-width="2.5"/></g>`
+    : `<rect x="40" y="16.5" width="20" height="7" rx="3.5" fill="#aab6c6" stroke="${NAVY}" stroke-width="2.5"/><circle cx="46" cy="20" r="1.6" fill="${NAVY}"/>`;
+  return `<svg viewBox="0 0 100 160" aria-hidden="true">
+<defs><linearGradient id="${id}" x1="0" x2="1"><stop offset="0" stop-color="${col.d}"/><stop offset=".3" stop-color="${col.c}"/><stop offset=".72" stop-color="${col.c}"/><stop offset="1" stop-color="${col.d}"/></linearGradient></defs>
+<path d="M15 22 L85 22 L85 142 Q85 154 72 154 L28 154 Q15 154 15 142 Z" fill="url(#${id})" stroke="${NAVY}" stroke-width="4" stroke-linejoin="round"/>
+<path d="M17 126 Q50 106 83 124 L83 135 Q50 118 17 138Z" fill="#fff" opacity=".9"/>
+<rect x="23" y="32" width="7" height="84" rx="3.5" fill="#fff" opacity=".38"/>
+<ellipse cx="50" cy="22" rx="35" ry="7.5" fill="#d3dbe6" stroke="${NAVY}" stroke-width="4"/>
+<ellipse cx="50" cy="21.5" rx="27" ry="4.5" fill="#b3bfcf"/>
+${tab}
+<ellipse cx="26" cy="81" rx="6" ry="3.5" fill="#ff8aa0" opacity=".75"/><ellipse cx="74" cy="81" rx="6" ry="3.5" fill="#ff8aa0" opacity=".75"/>
+${eyes}${mouth}</svg>`;
+}
+const ARROW = `<svg class="arr" viewBox="0 0 20 60" aria-hidden="true"><path d="M10 7 V53 M3 15 L10 6 L17 15 M3 45 L10 54 L17 45" stroke="#1f6fe5" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const SPARK = `<svg class="arr" viewBox="0 0 24 60" aria-hidden="true"><path d="M12 8 v10 M4 16 l6 6 M20 16 l-6 6" stroke="#ffb400" stroke-width="4" stroke-linecap="round"/></svg>`;
+const SPRAY = `<svg class="arr" viewBox="0 0 30 60" aria-hidden="true"><path d="M15 58 Q12 30 15 4 M15 58 Q2 34 4 14 M15 58 Q28 34 26 14" stroke="#5cc8ff" stroke-width="4.5" fill="none" stroke-linecap="round"/><circle cx="6" cy="6" r="2.5" fill="#5cc8ff"/><circle cx="24" cy="5" r="2.5" fill="#5cc8ff"/></svg>`;
+
+/* ---------- 画面の組み立て ---------- */
+(function buildStatic() {
+  const b = $('#bunting'); let s = `<path d="M0 6 Q200 30 400 6" stroke="#fff" stroke-width="2" fill="none"/>`;
+  const fc = ['#ef3340', '#ffd23a', '#35c24f', '#2a7cf0', '#ff7ac0', '#ffb81c'];
+  for (let i = 0; i < 16; i++) {
+    const x = 6 + i * 25, t = x / 400, y = 6 + 24 * 4 * t * (1 - t) * 0.5 * 2 * 0.5;
+    s += `<path d="M${x} ${y} L${x + 18} ${y + 1} L${x + 9} ${y + 20} Z" fill="${fc[i % fc.length]}"/>`;
+  }
+  b.innerHTML = s;
+  $('#hero').innerHTML =
+    `<div class="side s1">${canSVG(COLORS[2], 'idle')}</div>` +
+    `<div class="main">${canSVG(COLORS[0], 'happy')}</div>` +
+    `<div class="side s2">${canSVG(COLORS[1], 'idle')}</div>` +
+    `<div class="side s3">${canSVG(COLORS[3], 'happy')}</div>`;
+  $('#illo1').innerHTML = ARROW + canSVG(COLORS[0], 'strain');
+  $('#illo2').innerHTML = canSVG(COLORS[0], 'idle', true) + SPARK;
+  $('#illo3').innerHTML = SPRAY + canSVG(COLORS[0], 'happy', true);
+})();
+
+/* ---------- 設定 ---------- */
+const coarse = matchMedia('(pointer:coarse)').matches;
+const S = {
+  humans: clamp(store.get('humans', 1), 1, 4),
+  input: store.get('input', coarse ? 'shake' : 'swipe'),
+  sound: store.get('sound', true),
+  screen: 'title',
+  token: 0,
+};
+function syncSettingsUI() {
+  for (const b of document.querySelectorAll('#segPlayers button')) b.setAttribute('aria-pressed', String(+b.dataset.v === S.humans));
+  for (const b of document.querySelectorAll('#segInput button')) b.setAttribute('aria-pressed', String(b.dataset.v === S.input));
+  for (const b of document.querySelectorAll('#segSound button')) b.setAttribute('aria-pressed', String((b.dataset.v === 'on') === S.sound));
+  $('#inputNote').textContent = S.input === 'shake'
+    ? (S.humans > 1 ? 'スマホ1台を順番にまわして、1人ずつふります。' : 'スマホ本体を上下にふります。')
+    : '画面のレーンを上下にこすります。複数人なら同時にプレイ！';
+  const com = 4 - S.humans;
+  $('#cfgText').textContent = `${S.humans}人${com ? ` + COM${com}` : ''}・${S.input === 'shake' ? 'スマホをふる' : 'スワイプ'}`;
+  const shake = S.input === 'shake';
+  $('#step1h').textContent = shake ? '5秒間、上下にふろう！' : '5秒間、上下にこすろう！';
+  $('#step1p').textContent = shake ? 'スマホを缶に見立てて、ひたすら上下にふります。強く速くふるほど圧力がたまります。'
+    : '自分のレーンを指でひたすら上下にこすります。速く大きく動かすほど圧力がたまります。';
+  $('#step2p').textContent = shake && S.humans === 1 ? '5秒たったら、画面をタップするか手首をひねってフタを開けます。' : '5秒たったら、自分の缶をタップしてフタを開けます。';
+  $('#safety').hidden = !shake;
+}
+function bindSeg(sel, fn) {
+  $(sel).addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; fn(b.dataset.v); syncSettingsUI(); blip(); });
+}
+bindSeg('#segPlayers', v => { S.humans = +v; store.set('humans', S.humans); });
+bindSeg('#segInput', v => { S.input = v; store.set('input', v); });
+bindSeg('#segSound', v => { S.sound = v === 'on'; store.set('sound', S.sound); });
+syncSettingsUI();
+
+/* ---------- サウンド（WebAudioで合成） ---------- */
+let ac = null, master, noiseBuf, fizzSrc, fizzGain;
+function audioInit() {
+  if (ac) { ac.resume?.(); return; }
+  try {
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    master = ac.createGain(); master.gain.value = 0.55; master.connect(ac.destination);
+    noiseBuf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
+    const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  } catch { ac = null; }
+}
+function tone(f, dur = 0.12, type = 'square', vol = 0.15, delay = 0) {
+  if (!ac || !S.sound) return;
+  const t = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g).connect(master); o.start(t); o.stop(t + dur + 0.02);
+}
+function blip() { tone(880, 0.06, 'triangle', 0.12); }
+function fizzStart() {
+  if (!ac || !S.sound || fizzSrc) return;
+  fizzSrc = ac.createBufferSource(); fizzSrc.buffer = noiseBuf; fizzSrc.loop = true;
+  const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 4200; bp.Q.value = 0.7;
+  fizzGain = ac.createGain(); fizzGain.gain.value = 0;
+  fizzSrc.connect(bp).connect(fizzGain).connect(master); fizzSrc.start();
+}
+function fizzLevel(v) { if (fizzGain) fizzGain.gain.setTargetAtTime(v * 0.5, ac.currentTime, 0.04); }
+function fizzStop() { if (fizzSrc) { try { fizzSrc.stop(); } catch {} fizzSrc = null; fizzGain = null; } }
+function popSound(strength) {
+  if (!ac || !S.sound) return;
+  const t = ac.currentTime, src = ac.createBufferSource(); src.buffer = noiseBuf;
+  const hp = ac.createBiquadFilter(); hp.type = 'highpass';
+  hp.frequency.setValueAtTime(600, t); hp.frequency.exponentialRampToValueAtTime(5000, t + 0.25);
+  const g = ac.createGain(); const dur = 0.6 + strength * 1.2;
+  g.gain.setValueAtTime(0.25 + strength * 0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  src.connect(hp).connect(g).connect(master); src.start(t); src.stop(t + dur);
+  tone(200, 0.12, 'sine', 0.4);
+}
+function fanfare() { [523, 659, 784, 1047].forEach((f, i) => tone(f, i === 3 ? 0.5 : 0.14, 'square', 0.12, i * 0.13)); }
+const vibrate = p => { try { navigator.vibrate?.(p); } catch {} };
+
+/* ---------- センサー ---------- */
+let motionAsked = false, motionSeen = false, lastMotion = 0, rot = 0;
+const grav = { x: 0, y: 0, z: 0 };
+async function ensureMotion() {
+  if (motionAsked) return; motionAsked = true;
+  try {
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+      await DeviceMotionEvent.requestPermission();
+    }
+  } catch {}
+  window.addEventListener('devicemotion', onMotion);
+}
+function onMotion(e) {
+  let x, y, z; const a = e.acceleration;
+  if (a && a.x != null) { x = a.x; y = a.y; z = a.z; }
+  else {
+    const g = e.accelerationIncludingGravity; if (!g || g.x == null) return;
+    grav.x = grav.x * 0.9 + g.x * 0.1; grav.y = grav.y * 0.9 + g.y * 0.1; grav.z = grav.z * 0.9 + g.z * 0.1;
+    x = g.x - grav.x; y = g.y - grav.y; z = g.z - grav.z;
+  }
+  motionSeen = true;
+  const now = performance.now(); const dt = clamp((now - lastMotion) / 1000, 0.005, 0.1); lastMotion = now;
+  const mag = Math.hypot(x, y, z);
+  const rr = e.rotationRate; rot = rr && rr.alpha != null ? Math.hypot(rr.alpha, rr.beta, rr.gamma) : 0;
+  if (!G || G.input !== 'shake') return;
+  if (G.phase === 'shake') {
+    for (const i of G.active) addEnergy(i, mag > 2.5 ? Math.min(mag, 40) * dt : 0);
+  } else if (G.phase === 'open' && S.humans === 1 && rot > 320 && now - G.openStart > 700) {
+    openCan(0);
+  }
+}
+
+/* ---------- ゲーム状態 ---------- */
+let G = null;
+const lanesEl = $('#lanes');
+function addEnergy(i, v) { const p = G.players[i]; if (p) p.energy += v; }
+const pressureOf = e => 1 - Math.exp(-e / 60);
+
+function show(name) {
+  S.screen = name;
+  for (const n of ['title', 'howto', 'game', 'result']) $('#scr-' + n).hidden = n !== name;
+}
+function setHint(t) { $('#hintText').textContent = t; }
+function showBig(text, kind) {
+  const b = $('#big'); b.className = 'big ' + kind; b.innerHTML = '';
+  if (text == null) return;
+  const s = document.createElement('span'); s.textContent = text; b.appendChild(s);
+}
+function flash() { const f = $('#flash'); f.classList.remove('on'); void f.offsetWidth; f.classList.add('on'); }
+function toast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; $('#app').appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+function buildLanes() {
+  lanesEl.innerHTML = '';
+  G.players.forEach((p, i) => {
+    const col = COLORS[i];
+    const lane = document.createElement('div');
+    lane.className = 'lane'; lane.dataset.i = i;
+    lane.style.setProperty('--c', col.c); lane.style.setProperty('--cd', col.d);
+    lane.innerHTML = `<div class="lane-head">${p.tag}</div>
+      <div class="can-wrap"><div class="can"></div><div class="tap-bubble">タップ!</div></div>
+      <div class="gauge"><div class="fill"></div><div class="ticks"></div></div>
+      <div class="podium"><b class="rk">?</b><span class="dist">--m</span></div>`;
+    lanesEl.appendChild(lane);
+    p.el = lane; p.canEl = lane.querySelector('.can'); p.fillEl = lane.querySelector('.fill');
+    p.face = ''; setFace(p, 'idle');
+  });
+}
+function setFace(p, face) {
+  const key = face + (p.opened ? '1' : '0');
+  if (p.face === key) return; p.face = key;
+  p.canEl.innerHTML = canSVG(COLORS[p.idx], face, p.opened);
+}
+
+async function startGame() {
+  const tok = ++S.token;
+  const ok = () => tok === S.token;
+  fizzStop();
+  G = {
+    input: S.input, phase: 'ready', active: [], tStart: 0, lastSec: 0, openStart: 0, revealAt: 0,
+    players: Array.from({ length: 4 }, (_, i) => {
+      const human = i < S.humans;
+      const target = rand(0.42, 0.86);
+      return { idx: i, human, tag: human ? `${i + 1}P` : 'COM', name: human ? `プレイヤー${i + 1}` : `COM${i + 1 - S.humans}`,
+        energy: 0, lastE: 0, int: 0, pressure: 0, opened: false, openAt: 0, distance: 0, shown: 0,
+        cpuRate: -60 * Math.log(1 - target) / SHAKE_SEC, cpuOpen: rand(0.5, 1.6), cpuDone: false, drops: 0 };
+    }),
+  };
+  $('#scr-game').classList.remove('spray', 'fever');
+  $('#btnResult').hidden = true; $('#hint').hidden = false;
+  $('#phaseLabel').textContent = 'シェイク中…'; $('#timerVal').textContent = SHAKE_SEC.toFixed(1);
+  showBig(null, '');
+  show('game'); buildLanes();
+  try { await navigator.wakeLock?.request('screen'); } catch {}
+
+  if (G.input === 'shake' && !motionSeen) {
+    await wait(600); if (!ok()) return;
+    if (!motionSeen) { G.input = 'swipe'; toast('モーションセンサーが使えないので、スワイプ操作に切り替えました'); }
+  }
+
+  if (G.input === 'swipe' || S.humans === 1) {
+    await runShake(G.players.filter(p => p.human).map(p => p.idx), tok);
+  } else {
+    for (let h = 0; h < S.humans; h++) {
+      if (!ok()) return;
+      if (h > 0 || S.humans > 1) {
+        for (const p of G.players) p.el.classList.toggle('dim', p.human && p.idx !== h);
+        $('#turnTitle').textContent = `${h + 1}Pの番！`;
+        $('#turnMsg').innerHTML = h === 0 ? 'まずは1Pから！<br>スマホをしっかり握ったら準備OK！' : `スマホを${h + 1}Pにわたしてね。<br>しっかり握ったら準備OK！`;
+        $('#turnOv').hidden = false;
+        await new Promise(r => { $('#btnTurn').onclick = () => { blip(); r(); }; });
+        $('#turnOv').hidden = true;
+      }
+      if (!ok()) return;
+      await runShake([h], tok);
+    }
+  }
+  if (!ok()) return;
+  for (const p of G.players) p.el.classList.remove('dim', 'active');
+  await openPhase(tok);
+}
+
+async function runShake(active, tok) {
+  G.active = active;
+  for (const p of G.players) p.el.classList.toggle('active', active.includes(p.idx));
+  const swipe = G.input === 'swipe';
+  setHint(swipe ? (S.humans > 1 ? '自分のレーンを上下にこすって ふろう！' : '画面を上下にスワイプして ふろう！') : 'スマホをしっかり握って 上下にふろう！');
+  $('#timerVal').textContent = SHAKE_SEC.toFixed(1);
+  showBig('よーい…', 'word'); tone(520, 0.15);
+  await wait(1000); if (tok !== S.token) return;
+  showBig('ふれ！', 'word'); tone(1040, 0.25);
+  await wait(450); if (tok !== S.token) return;
+  G.lastSec = 0; G.tStart = performance.now(); G.phase = 'shake'; fizzStart();
+  await new Promise(r => { G.onShakeEnd = r; });
+  if (tok !== S.token) return;
+  G.phase = 'between'; fizzStop(); tone(330, 0.4, 'sawtooth', 0.12);
+  $('#scr-game').classList.remove('fever');
+  showBig('そこまで！', 'word'); vibrate(200);
+  for (const p of G.players) if (!p.human) p.cpuDone = true;
+  await wait(900);
+}
+
+async function openPhase(tok) {
+  G.phase = 'open'; G.openStart = performance.now();
+  flash();
+  const g = $('#scr-game'); g.classList.add('spray'); g.classList.remove('fever');
+  $('#phaseLabel').textContent = 'フタをあけて！';
+  showBig('フタをあけて！', 'word'); tone(784, 0.1); tone(1175, 0.2, 'square', 0.15, 0.1);
+  setHint(G.input === 'shake' && S.humans === 1 ? '画面をタップ か 手首をひねって フタを開けよう！' : '自分の缶をタップして フタを開けよう！');
+  for (const p of G.players) { p.pressure = pressureOf(p.energy); p.el.classList.toggle('need-open', p.human); p.int = 0; }
+  await wait(1100); if (tok !== S.token) return;
+  if (G.phase === 'open') showBig(null, '');
+}
+
+function openCan(i) {
+  const p = G.players[i];
+  if (!p || p.opened || G.phase !== 'open') return;
+  p.opened = true; p.openAt = performance.now();
+  p.distance = Math.max(0.1, Math.round((0.2 + 4.8 * p.pressure + rand(-0.06, 0.06)) * 10) / 10);
+  p.distance = Math.min(MAX_M, p.distance);
+  p.el.classList.remove('need-open');
+  setFace(p, 'happy');
+  popSound(p.pressure);
+  if (p.human) vibrate([60, 40, 160]);
+  if (G.players.every(q => q.opened)) {
+    G.revealAt = Math.max(...G.players.map(q => q.openAt)) + 2400;
+  }
+}
+
+function reveal() {
+  G.phase = 'reveal';
+  const sorted = [...G.players].sort((a, b) => b.distance - a.distance);
+  sorted.forEach((p, k) => { p.rank = k > 0 && p.distance === sorted[k - 1].distance ? sorted[k - 1].rank : k + 1; });
+  for (const p of G.players) {
+    p.el.querySelector('.rk').textContent = `${p.rank}位`;
+    p.el.querySelector('.dist').textContent = `${p.distance.toFixed(1)}m`;
+  }
+  showBig(null, '');
+  fanfare();
+  $('#hint').hidden = true; $('#btnResult').hidden = false;
+}
+
+function buildResult() {
+  const sorted = [...G.players].sort((a, b) => a.rank - b.rank || b.distance - a.distance);
+  $('#resList').innerHTML = sorted.map(p => `<li style="--c:${COLORS[p.idx].c}">
+    <span class="rb">${p.rank}位</span><span class="mini">${canSVG(COLORS[p.idx], p.rank === 1 ? 'happy' : 'idle', true)}</span>
+    <span class="nm">${p.name}<small>${p.tag}</small></span><span class="d">${p.distance.toFixed(1)}<small>m</small></span></li>`).join('');
+  const top = sorted[0];
+  $('#bestCan').innerHTML = canSVG(COLORS[top.idx], 'happy', true);
+  $('#bestVal').innerHTML = `${top.distance.toFixed(1)}<small>m</small>`;
+  const humanBest = Math.max(...G.players.filter(p => p.human).map(p => p.distance));
+  const record = store.get('best', 0);
+  const sub = $('#bestSub');
+  if (humanBest > record) { store.set('best', humanBest); sub.textContent = `新記録！ あなたの最高 ${humanBest.toFixed(1)}m`; sub.className = 'sub new'; }
+  else { sub.textContent = `これまでの最高記録 ${record.toFixed(1)}m`; sub.className = 'sub'; }
+}
+
+/* ---------- 入力（スワイプ・タップ） ---------- */
+const pointers = new Map();
+$('#scr-game').addEventListener('pointerdown', e => {
+  if (!G) return;
+  const lane = e.target.closest('.lane'); const i = lane ? +lane.dataset.i : -1;
+  if (G.phase === 'open') {
+    if (i >= 0 && G.players[i].human) openCan(i);
+    else if (S.humans === 1) openCan(0);
+    return;
+  }
+  if (G.input === 'swipe' && i >= 0 && G.players[i].human) {
+    pointers.set(e.pointerId, { i, y: e.clientY });
+    try { lane.setPointerCapture(e.pointerId); } catch {}
+  }
+});
+$('#scr-game').addEventListener('pointermove', e => {
+  const pt = pointers.get(e.pointerId); if (!pt || !G) return;
+  const dy = Math.abs(e.clientY - pt.y); pt.y = e.clientY;
+  if (G.phase === 'shake' && G.active.includes(pt.i)) addEnergy(pt.i, dy / window.innerHeight * 12);
+});
+const endPtr = e => pointers.delete(e.pointerId);
+$('#scr-game').addEventListener('pointerup', endPtr);
+$('#scr-game').addEventListener('pointercancel', endPtr);
+
+/* ---------- ボタン ---------- */
+$('#btnStart').onclick = () => { audioInit(); blip(); show('howto'); };
+$('#btnGo').onclick = () => { audioInit(); ensureMotion(); blip(); startGame(); };
+$('#btnGear').onclick = $('#btnCfg').onclick = () => { audioInit(); blip(); $('#settings').hidden = false; };
+$('#btnCloseSet').onclick = () => { blip(); $('#settings').hidden = true; };
+$('#btnResult').onclick = () => { blip(); buildResult(); show('result'); };
+$('#btnAgain').onclick = () => { audioInit(); ensureMotion(); blip(); startGame(); };
+$('#btnHome').onclick = () => { blip(); S.token++; fizzStop(); show('title'); };
+
+/* ---------- 演出キャンバス ---------- */
+const cv = $('#fx'), ctx = cv.getContext('2d');
+let W = 0, H = 0, DPR = 1;
+function resize() {
+  const r = $('#app').getBoundingClientRect(); DPR = Math.min(2, window.devicePixelRatio || 1);
+  W = r.width; H = r.height; cv.width = W * DPR; cv.height = H * DPR;
+}
+addEventListener('resize', resize); resize();
+const parts = [];
+const CONF = ['#ef3340', '#ffd23a', '#35c24f', '#2a7cf0', '#ff7ac0', '#ffffff'];
+
+function nozzleOf(p, appR) {
+  const r = p.canEl.getBoundingClientRect();
+  return { x: r.left + r.width / 2 - appR.left, y: r.top + r.height * (22 / 160) - appR.top, w: r.width };
+}
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (S.screen === 'game' && G) updateGame(now, dt);
+  draw(now, dt);
+  requestAnimationFrame(frame);
+}
+
+let vibT = 0;
+function updateGame(now, dt) {
+  if (G.phase === 'shake') {
+    const left = Math.max(0, SHAKE_SEC - (now - G.tStart) / 1000);
+    $('#timerVal').textContent = left.toFixed(1);
+    const sec = Math.ceil(left);
+    if (sec !== G.lastSec && sec > 0) {
+      G.lastSec = sec;
+      if (sec === 1) {
+        $('#scr-game').classList.add('fever'); showBig('あと1秒！', 'word warn'); setHint('最後まで ふりきろう！'); tone(1320, 0.2, 'square', 0.14);
+      } else { showBig(String(sec), 'num'); tone(660, 0.08); }
+    }
+    for (const p of G.players) {
+      if (!p.human && !p.cpuDone) p.energy += p.cpuRate * dt * (0.55 + 0.9 * Math.abs(Math.sin(now / 170 + p.idx * 1.7)));
+    }
+    if (left <= 0 && G.onShakeEnd) { const r = G.onShakeEnd; G.onShakeEnd = null; r(); }
+  }
+  let loud = 0;
+  for (const p of G.players) {
+    const rate = (p.energy - p.lastE) / Math.max(dt, 0.001); p.lastE = p.energy;
+    p.int = p.int * 0.82 + clamp(rate / 22, 0, 1) * 0.18;
+    if (!p.opened) p.pressure = pressureOf(p.energy);
+    p.fillEl.style.height = (p.pressure * 100).toFixed(1) + '%';
+    let k = p.int, t = now / 1000;
+    if (p.opened) k = Math.max(0, 0.6 - (now - p.openAt) / 1500);
+    p.canEl.style.transform = k > 0.01
+      ? `translateY(${(Math.sin(t * 38 + p.idx) * k * 8).toFixed(1)}px) rotate(${(Math.sin(t * 29 + p.idx * 2) * k * 8).toFixed(1)}deg)` : '';
+    if (!p.opened) setFace(p, p.int > 0.22 ? 'strain' : 'idle');
+    if (p.human && G.active.includes(p.idx)) loud = Math.max(loud, p.int);
+  }
+  if (G.phase === 'shake') {
+    fizzLevel(loud);
+    if (loud > 0.35 && now - vibT > 140) { vibT = now; vibrate(18); }
+  }
+  if (G.phase === 'open') {
+    const el = (now - G.openStart) / 1000;
+    for (const p of G.players) {
+      if (p.opened) continue;
+      if (!p.human && el > p.cpuOpen) openCan(p.idx);
+      else if (p.human && el > 6) openCan(p.idx);
+    }
+    if (G.revealAt && now > G.revealAt) reveal();
+  }
+}
+
+function draw(now, dt) {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  const conf = S.screen === 'title' || S.screen === 'result';
+  if (conf && parts.length < 90 && Math.random() < 0.5) {
+    parts.push({ k: 'c', x: rand(0, W), y: -10, vx: rand(-20, 20), vy: rand(60, 130), w: rand(6, 10), h: rand(3, 6), rot: rand(0, 6), vr: rand(-6, 6), col: CONF[(Math.random() * CONF.length) | 0] });
+  }
+  const spraying = S.screen === 'game' && G && (G.phase === 'open' || G.phase === 'reveal');
+  if (spraying) drawSpray(now, dt);
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const q = parts[i];
+    if (q.k === 'c') {
+      if (!conf) { parts.splice(i, 1); continue; }
+      q.x += (q.vx + Math.sin(now / 400 + q.rot) * 30) * dt; q.y += q.vy * dt; q.rot += q.vr * dt;
+      if (q.y > H + 20) { parts.splice(i, 1); continue; }
+      ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(q.rot); ctx.fillStyle = q.col; ctx.fillRect(-q.w / 2, -q.h / 2, q.w, q.h * Math.abs(Math.cos(q.rot * 1.3)) + 1); ctx.restore();
+    } else {
+      if (!spraying) { parts.splice(i, 1); continue; }
+      q.vy += 900 * dt; q.x += q.vx * dt; q.y += q.vy * dt; q.life -= dt;
+      if (q.life <= 0 || q.y > H) { parts.splice(i, 1); continue; }
+      ctx.globalAlpha = Math.min(1, q.life * 2);
+      ctx.fillStyle = q.col; ctx.beginPath(); ctx.arc(q.x, q.y, q.r, 0, 7); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  }
+}
+
+function drawSpray(now, dt) {
+  const appR = $('#app').getBoundingClientRect();
+  const topR = document.querySelector('.g-top').getBoundingClientRect();
+  const noz = G.players.map(p => nozzleOf(p, appR));
+  const baseY = noz[0].y;
+  const ceil = topR.bottom - appR.top + 34;
+  const maxH = Math.max(40, baseY - ceil);
+  // 目盛り（0〜5m）
+  ctx.font = `800 11px ${FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  for (let m = 1; m <= MAX_M; m++) {
+    const y = baseY - (m / MAX_M) * maxH;
+    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 6]);
+    ctx.beginPath(); ctx.moveTo(26, y); ctx.lineTo(W - 4, y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.lineWidth = 3; ctx.strokeStyle = NAVY; ctx.strokeText(`${m}m`, 3, y); ctx.fillStyle = '#fff'; ctx.fillText(`${m}m`, 3, y);
+  }
+  G.players.forEach((p, i) => {
+    if (!p.opened) return;
+    const n = noz[i], col = COLORS[i];
+    const t = (now - p.openAt) / 1000;
+    const rise = 1 - Math.pow(1 - clamp(t / 1.3, 0, 1), 3);
+    const fall = clamp((t - 2.8) / 1.4, 0, 1);
+    const target = (p.distance / MAX_M) * maxH;
+    const h = target * rise * (1 - 0.88 * fall) * (1 + 0.025 * Math.sin(t * 22 + i));
+    const topY = n.y - h;
+    const bw = n.w * 0.13, tw = n.w * (0.22 + 0.06 * Math.sin(t * 17 + i));
+    const grd = ctx.createLinearGradient(0, topY, 0, n.y);
+    grd.addColorStop(0, '#ffffff'); grd.addColorStop(0.5, col.foam); grd.addColorStop(1, col.c);
+    ctx.fillStyle = grd; ctx.globalAlpha = 0.92;
+    ctx.beginPath();
+    ctx.moveTo(n.x - bw, n.y);
+    ctx.quadraticCurveTo(n.x - bw * 0.7 + Math.sin(t * 13) * 3, (n.y + topY) / 2, n.x - tw, topY + 6);
+    ctx.arc(n.x, topY + 6, tw, Math.PI, 0);
+    ctx.quadraticCurveTo(n.x + bw * 0.7 + Math.sin(t * 11) * 3, (n.y + topY) / 2, n.x + bw, n.y);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.85)';
+    ctx.fillRect(n.x - bw * 0.3, topY + 8, bw * 0.6, Math.max(0, h - 8));
+    ctx.globalAlpha = 1;
+    const emit = fall < 1 ? (h > 10 ? 3 : 1) : 0;
+    for (let k = 0; k < emit && parts.length < 700; k++) {
+      parts.push({ k: 'd', x: n.x + rand(-tw, tw), y: topY + rand(0, 10), vx: rand(-110, 110), vy: rand(-240, -30),
+        r: rand(2, 5.5), life: rand(0.7, 1.4), col: Math.random() < 0.5 ? '#fff' : col.foam });
+    }
+    // 高さ表示
+    const shown = p.distance * rise;
+    ctx.font = `900 ${Math.round(n.w * 0.26)}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.lineWidth = 5; ctx.strokeStyle = NAVY; ctx.lineJoin = 'round';
+    const ly = Math.max(ceil - 4, topY - tw - 4);
+    ctx.strokeText(`${shown.toFixed(1)}m`, n.x, ly); ctx.fillStyle = '#fff'; ctx.fillText(`${shown.toFixed(1)}m`, n.x, ly);
+  });
+}
+
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
