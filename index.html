@@ -197,6 +197,45 @@ button:focus-visible{outline:4px solid #fff;outline-offset:3px}
 .seg button{flex:1;border:3px solid var(--navy2);background:#fff;border-radius:12px;padding:9px 0;font-weight:900;font-size:.95rem}
 .seg button[aria-pressed="true"]{background:var(--yellow);box-shadow:inset 0 -4px 0 rgba(200,110,0,.35)}
 
+/* ===== オンライン ===== */
+.title-foot{flex-direction:column;gap:14px}
+#btnOnline{font-size:clamp(1.05rem,5vw,1.25rem);width:calc(100% - 140px);max-width:260px;padding:.55em .6em;white-space:nowrap}
+.title .gear{bottom:2px}
+.online{padding:16px;gap:12px;background:linear-gradient(#2a7bf0,#1450c4)}
+.online .panel{flex:1;overflow:auto;gap:12px}
+.me-card{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--paper);border-radius:14px;padding:8px 12px;font-weight:800;font-size:.9rem}
+.me-card b{font-size:1.1rem;color:var(--blue);flex:1;min-width:8em}
+.me-card button,.on-small{border:3px solid var(--navy2);background:#fff;border-radius:999px;padding:4px 14px;font-weight:800}
+.nick-pick{display:flex;gap:6px}
+.nick-pick select{flex:1;min-width:0;font:inherit;font-weight:800;padding:6px;border:3px solid var(--navy2);border-radius:10px;background:#fff;color:var(--navy)}
+.on-sec{display:flex;flex-direction:column;gap:8px;align-items:stretch;text-align:center}
+.on-sec h3{margin:0;font-size:1.05rem;font-weight:900;color:var(--navy2)}
+.on-sec small{font-size:.75rem;font-weight:700;color:#44598a;line-height:1.5}
+.on-sec .btn-yellow{font-size:1.5rem}
+.on-sep{border:none;border-top:3px dashed #bcd6ff;margin:2px 0;width:100%}
+.join{display:flex;gap:8px}
+.join input{flex:1;min-width:0;font:inherit;font-size:1.4rem;font-weight:900;text-align:center;letter-spacing:.3em;border:3px solid var(--navy2);border-radius:14px;padding:6px;color:var(--navy)}
+.join input:focus{outline:3px solid var(--yellow)}
+.join button{border:3px solid var(--navy);border-radius:14px;background:var(--yellow);font-weight:900;font-size:1.1rem;padding:0 18px;box-shadow:0 4px 0 var(--navy)}
+.join button.hot{animation:bounce2 .6s ease-in-out infinite alternate}
+@keyframes bounce2{to{transform:translateY(-4px)}}
+.code-show{font-size:3rem;font-weight:900;letter-spacing:.25em;color:var(--navy);background:#fff7d6;border:3px dashed #f3c200;border-radius:16px;padding:4px 0 4px .25em;font-variant-numeric:tabular-nums}
+.wait-title{font-weight:900;font-size:1.15rem;color:var(--navy2)}
+.dots{display:flex;justify-content:center;gap:10px;height:24px;align-items:center}
+.dots i{width:14px;height:14px;border-radius:50%;background:var(--blue);animation:dot 1s ease-in-out infinite}
+.dots i:nth-child(2){animation-delay:.15s;background:var(--yellow2)} .dots i:nth-child(3){animation-delay:.3s;background:var(--red)}
+@keyframes dot{50%{transform:translateY(-8px)}}
+.on-msg{margin:0;min-height:1.4em;text-align:center;font-weight:800;font-size:.85rem;color:#c0182a;line-height:1.5}
+.lanes.duo .can-wrap{width:min(80%,118px)}
+.lanes.duo .gauge{width:38%}
+.vs-card .vs-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px}
+.vs-card .vs-p{display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:900;font-size:.85rem;line-height:1.3;word-break:break-all}
+.vs-card .vs-p .mini{width:54px}
+.vs-card .vs-p .mini svg{display:block;width:100%}
+.vs-card .vs-p small{font-size:.7rem;color:#5a6f9c}
+.vs-card .vs{font-size:2.2rem;--sw:7px;--sd:4px;color:var(--red)}
+.res-note{position:relative;z-index:1;margin:0;text-align:center;font-weight:800;font-size:.85rem;color:#1450c4;min-height:1.3em}
+
 @media (prefers-reduced-motion:reduce){
   .burst::before,.hero .main,.fill,.tap-bubble{animation:none}
 }
@@ -221,7 +260,39 @@ button:focus-visible{outline:4px solid #fff;outline-offset:3px}
         <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M19.4 13a7.7 7.7 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.3 7.3 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.3 7.3 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.7 7.7 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1l.4 2.6h4l.4-2.6c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>
       </button>
       <button class="btn-yellow" id="btnStart">スタート ▶</button>
+      <button class="btn-blue" id="btnOnline">オンライン対戦</button>
     </div>
+  </section>
+
+  <!-- オンライン対戦のロビー -->
+  <section class="screen online" id="scr-online" hidden>
+    <div class="ribbon-title">オンライン対戦</div>
+    <div class="panel">
+      <div class="me-card"><span>あなたの名前</span><b id="onNick"></b><button id="btnNick">かえる</button></div>
+      <div class="nick-pick" id="nickPick" hidden><select id="nickA" aria-label="名前の前半"></select><select id="nickB" aria-label="名前の後半"></select></div>
+      <div class="cfg"><span id="onCfg"></span><button id="btnOnInput">操作を変える</button></div>
+      <div class="on-sec" id="onMenu">
+        <button class="btn-yellow" id="btnQuick">ランダム対戦</button>
+        <small>いま遊んでいる だれかと すぐ対戦（ふる時間 10秒）</small>
+        <hr class="on-sep">
+        <h3>友だちと対戦</h3>
+        <button class="btn-blue" id="btnMake">部屋をつくる</button>
+        <small id="makeNote"></small>
+        <div class="join"><input id="codeIn" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="番号4けた" aria-label="部屋の番号" autocomplete="off"><button id="btnJoin">入る</button></div>
+      </div>
+      <div class="on-sec" id="onWait" hidden>
+        <div class="wait-title" id="waitTitle">相手をさがしています…</div>
+        <div id="codeBox" hidden>
+          <small>この番号を友だちに伝えてね</small>
+          <div class="code-show" id="codeShow">----</div>
+        </div>
+        <button class="btn-blue" id="btnShare" hidden>友だちに送る</button>
+        <div class="dots"><i></i><i></i><i></i></div>
+        <button class="on-small" id="btnCancel">やめる</button>
+      </div>
+      <p class="on-msg" id="onMsg" role="status"></p>
+    </div>
+    <button class="btn-blue" id="btnOnBack">もどる</button>
   </section>
 
   <!-- あそびかた -->
@@ -268,6 +339,16 @@ button:focus-visible{outline:4px solid #fff;outline-offset:3px}
         <button class="btn-yellow" id="btnTurn" style="font-size:1.4rem">準備OK！</button>
       </div>
     </div>
+    <div class="overlay" id="vsOv" hidden>
+      <div class="card vs-card">
+        <div class="vs-row">
+          <div class="vs-p"><span class="mini" id="vsMeCan"></span><span id="vsMe"></span><small>あなた</small></div>
+          <b class="pop vs">VS</b>
+          <div class="vs-p"><span class="mini" id="vsOpCan"></span><span id="vsOp"></span><small>あいて</small></div>
+        </div>
+        <p id="vsMsg">まもなく スタート！</p>
+      </div>
+    </div>
   </section>
 
   <!-- 結果 -->
@@ -275,8 +356,9 @@ button:focus-visible{outline:4px solid #fff;outline-offset:3px}
     <div class="burst"></div>
     <div class="res-head">
       <svg viewBox="0 0 56 40" aria-hidden="true"><path d="M4 34 L8 10 L19 22 L28 4 L37 22 L48 10 L52 34 Z" fill="#ffd23a" stroke="#0b2a6b" stroke-width="3.5" stroke-linejoin="round"/><circle cx="28" cy="24" r="3.5" fill="#ee2b3b"/></svg>
-      <h2 class="pop">結果発表!</h2>
+      <h2 class="pop" id="resTitle">結果発表!</h2>
     </div>
+    <p class="res-note" id="resNote" hidden></p>
     <div class="panel">
       <ol class="res-list" id="resList"></ol>
       <div class="best">
@@ -494,20 +576,22 @@ function onMotion(e) {
   if (!G || G.input !== 'shake') return;
   if (G.phase === 'shake') {
     for (const i of G.active) addEnergy(i, mag > 2.5 ? Math.min(mag, 40) * dt : 0);
-  } else if (G.phase === 'open' && S.humans === 1 && rot > 320 && now - G.openStart > 700) {
+  } else if (G.phase === 'open' && soloLike() && rot > 320 && now - G.openStart > 700) {
     openCan(0);
   }
 }
 
 /* ---------- ゲーム状態 ---------- */
 let G = null;
+let ON = null; // オンライン対戦中の情報（下の「オンライン対戦」で使う）
+const soloLike = () => !!(G && G.online) || S.humans === 1; // スマホ1台を1人で使う遊び方
 const lanesEl = $('#lanes');
 function addEnergy(i, v) { const p = G.players[i]; if (p) p.energy += v; }
 const pressureOf = e => 1 - Math.exp(-e / (12 * SHAKE_SEC));
 
 function show(name) {
   S.screen = name;
-  for (const n of ['title', 'howto', 'game', 'result']) $('#scr-' + n).hidden = n !== name;
+  for (const n of ['title', 'howto', 'online', 'game', 'result']) $('#scr-' + n).hidden = n !== name;
 }
 function setHint(t) { $('#hintText').textContent = t; }
 function showBig(text, kind) {
@@ -523,8 +607,10 @@ function toast(msg) {
 
 function buildLanes() {
   lanesEl.innerHTML = '';
+  lanesEl.style.gridTemplateColumns = `repeat(${G.players.length},1fr)`;
+  lanesEl.classList.toggle('duo', G.players.length === 2);
   G.players.forEach((p, i) => {
-    const col = COLORS[i];
+    const col = p.col;
     const lane = document.createElement('div');
     lane.className = 'lane'; lane.dataset.i = i;
     lane.style.setProperty('--c', col.c); lane.style.setProperty('--cd', col.d);
@@ -540,24 +626,31 @@ function buildLanes() {
 function setFace(p, face) {
   const key = face + (p.opened ? '1' : '0');
   if (p.face === key) return; p.face = key;
-  p.canEl.innerHTML = canSVG(COLORS[p.idx], face, p.opened);
+  p.canEl.innerHTML = canSVG(p.col, face, p.opened);
 }
 
 async function startGame() {
   const tok = ++S.token;
-  SHAKE_SEC = S.sec;
+  const online = !!ON;
+  SHAKE_SEC = online ? ON.sec : S.sec;
   const ok = () => tok === S.token;
   fizzStop();
+  const base = { energy: 0, lastE: 0, int: 0, pressure: 0, opened: false, openAt: 0, distance: 0, shown: 0, cpuDone: false, drops: 0 };
   G = {
-    input: S.input, phase: 'ready', active: [], tStart: 0, lastSec: 0, openStart: 0, revealAt: 0,
-    players: Array.from({ length: 4 }, (_, i) => {
-      const human = i < S.humans;
-      const target = rand(0.42, 0.86);
-      return { idx: i, human, tag: human ? `${i + 1}P` : 'COM', name: human ? `プレイヤー${i + 1}` : `COM${i + 1 - S.humans}`,
-        energy: 0, lastE: 0, int: 0, pressure: 0, opened: false, openAt: 0, distance: 0, shown: 0,
-        cpuRate: -12 * Math.log(1 - target), cpuOpen: rand(0.5, 1.6), cpuDone: false, drops: 0 };
-    }),
+    input: S.input, phase: 'ready', active: [], tStart: 0, lastSec: 0, openStart: 0, revealAt: 0, online,
+    players: online
+      ? [
+        { ...base, idx: 0, col: COLORS[ON.role === 'h' ? 0 : 1], human: true, tag: 'あなた', name: ON.myName },
+        { ...base, idx: 1, col: COLORS[ON.role === 'h' ? 1 : 0], human: false, remote: true, tag: 'あいて', name: ON.oppName, netP: 0, netD: -1 },
+      ]
+      : Array.from({ length: 4 }, (_, i) => {
+        const human = i < S.humans;
+        const target = rand(0.42, 0.86);
+        return { ...base, idx: i, col: COLORS[i], human, tag: human ? `${i + 1}P` : 'COM', name: human ? `プレイヤー${i + 1}` : `COM${i + 1 - S.humans}`,
+          cpuRate: -12 * Math.log(1 - target), cpuOpen: rand(0.5, 1.6) };
+      }),
   };
+  // オンラインでは「自分＝0番」。色は部屋を作った人が赤、入った人が青
   $('#scr-game').classList.remove('spray', 'fever');
   $('#btnResult').hidden = true; $('#hint').hidden = false;
   $('#phaseLabel').textContent = 'シェイク中…'; $('#timerVal').textContent = SHAKE_SEC.toFixed(1);
@@ -570,7 +663,19 @@ async function startGame() {
     if (!motionSeen) { G.input = 'swipe'; toast('モーションセンサーが使えないので、スワイプ操作に切り替えました'); }
   }
 
-  if (G.input === 'swipe' || S.humans === 1) {
+  if (online) {
+    // 二人とも同じ時刻（サーバーの時計）にスタートする
+    $('#vsMe').textContent = ON.myName; $('#vsOp').textContent = ON.oppName;
+    $('#vsMeCan').innerHTML = canSVG(G.players[0].col, 'idle');
+    $('#vsOpCan').innerHTML = canSVG(G.players[1].col, 'idle');
+    $('#vsMsg').textContent = ON.round > 1 ? `第${ON.round}戦 まもなくスタート！` : 'まもなく スタート！';
+    $('#vsOv').hidden = false;
+    const startAt = ON.t0 - 1450; // 「よーい」「ふれ！」の分だけ前から始める
+    while (ok() && NET.now() < startAt) await wait(Math.min(100, startAt - NET.now()));
+    $('#vsOv').hidden = true;
+    if (!ok()) return;
+    await runShake([0], tok);
+  } else if (G.input === 'swipe' || S.humans === 1) {
     await runShake(G.players.filter(p => p.human).map(p => p.idx), tok);
   } else {
     for (let h = 0; h < S.humans; h++) {
@@ -596,7 +701,7 @@ async function runShake(active, tok) {
   G.active = active;
   for (const p of G.players) p.el.classList.toggle('active', active.includes(p.idx));
   const swipe = G.input === 'swipe';
-  setHint(swipe ? (S.humans > 1 ? '自分のレーンを上下にこすって ふろう！' : '画面を上下にスワイプして ふろう！') : 'スマホをしっかり握って 上下にふろう！');
+  setHint(swipe ? (!soloLike() ?'自分のレーンを上下にこすって ふろう！' : '画面を上下にスワイプして ふろう！') : 'スマホをしっかり握って 上下にふろう！');
   $('#timerVal').textContent = SHAKE_SEC.toFixed(1);
   showBig('よーい…', 'word'); tone(520, 0.15);
   await wait(1000); if (tok !== S.token) return;
@@ -618,22 +723,27 @@ async function openPhase(tok) {
   const g = $('#scr-game'); g.classList.add('spray'); g.classList.remove('fever');
   $('#phaseLabel').textContent = 'フタをあけて！';
   showBig('フタをあけて！', 'word'); tone(784, 0.1); tone(1175, 0.2, 'square', 0.15, 0.1);
-  setHint(G.input === 'shake' && S.humans === 1 ? '画面をタップ か 手首をひねって フタを開けよう！' : '自分の缶をタップして フタを開けよう！');
+  setHint(G.input === 'shake' && soloLike() ?'画面をタップ か 手首をひねって フタを開けよう！' : '自分の缶をタップして フタを開けよう！');
   for (const p of G.players) { p.pressure = pressureOf(p.energy); p.el.classList.toggle('need-open', p.human); p.int = 0; }
   await wait(1100); if (tok !== S.token) return;
   if (G.phase === 'open') showBig(null, '');
 }
 
-function openCan(i) {
+function openCan(i, fixed) {
   const p = G.players[i];
   if (!p || p.opened || G.phase !== 'open') return;
   p.opened = true; p.openAt = performance.now();
-  p.distance = Math.max(0.1, Math.round((0.2 + 4.8 * p.pressure + rand(-0.06, 0.06)) * 10) / 10);
-  p.distance = Math.min(MAX_M, p.distance);
+  if (fixed != null) p.distance = fixed; // 相手の記録（ネットで届いた値）
+  else {
+    p.distance = Math.max(0.1, Math.round((0.2 + 4.8 * p.pressure + rand(-0.06, 0.06)) * 10) / 10);
+    p.distance = Math.min(MAX_M, p.distance);
+  }
+  if (G.online && p.human) onlineSendDistance(p.distance);
   p.el.classList.remove('need-open');
   setFace(p, 'happy');
   popSound(p.pressure);
   if (p.human) vibrate([60, 40, 160]);
+  if (G.online && p.human && !G.players[1].opened) setHint('あいてがフタを開けるのを まっています…');
   if (G.players.every(q => q.opened)) {
     G.revealAt = Math.max(...G.players.map(q => q.openAt)) + 2400;
   }
@@ -650,15 +760,29 @@ function reveal() {
   showBig(null, '');
   fanfare();
   $('#hint').hidden = true; $('#btnResult').hidden = false;
+  $('#btnResult').textContent = G.online ? '結果を見る ▶' : '結果発表へ ▶';
 }
 
 function buildResult() {
   const sorted = [...G.players].sort((a, b) => a.rank - b.rank || b.distance - a.distance);
-  $('#resList').innerHTML = sorted.map(p => `<li style="--c:${COLORS[p.idx].c}">
-    <span class="rb">${p.rank}位</span><span class="mini">${canSVG(COLORS[p.idx], p.rank === 1 ? 'happy' : 'idle', true)}</span>
-    <span class="nm">${p.name}<small>${p.tag}</small></span><span class="d">${p.distance.toFixed(1)}<small>m</small></span></li>`).join('');
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  $('#resList').innerHTML = sorted.map(p => `<li style="--c:${p.col.c}">
+    <span class="rb">${p.rank}位</span><span class="mini">${canSVG(p.col, p.rank === 1 ? 'happy' : 'idle', true)}</span>
+    <span class="nm">${esc(p.name)}<small>${p.tag}</small></span><span class="d">${p.distance.toFixed(1)}<small>m</small></span></li>`).join('');
   const top = sorted[0];
-  $('#bestCan').innerHTML = canSVG(COLORS[top.idx], 'happy', true);
+  if (G.online) {
+    const me = G.players[0], op = G.players[1];
+    $('#resTitle').textContent = op.forfeit ? '不戦勝!' : me.distance > op.distance ? 'かち!' : me.distance < op.distance ? 'まけ…' : 'ひきわけ!';
+    ON.wins += me.distance > op.distance ? 1 : 0; ON.losses += me.distance < op.distance ? 1 : 0;
+    $('#resNote').hidden = false;
+    $('#resNote').textContent = (op.gone ? 'あいてが ぬけました　' : '') + `${ON.oppName} さんとの対戦成績：${ON.wins}勝 ${ON.losses}敗`;
+    $('#btnAgain').textContent = op.gone ? 'ロビーへ' : 'もう一回!';
+  } else {
+    $('#resTitle').textContent = '結果発表!';
+    $('#resNote').hidden = true;
+    $('#btnAgain').textContent = 'もう一回!';
+  }
+  $('#bestCan').innerHTML = canSVG(top.col, 'happy', true);
   $('#bestVal').innerHTML = `${top.distance.toFixed(1)}<small>m</small>`;
   const humanBest = Math.max(...G.players.filter(p => p.human).map(p => p.distance));
   const record = store.get('best', 0);
@@ -674,10 +798,12 @@ $('#scr-game').addEventListener('pointerdown', e => {
   const lane = e.target.closest('.lane'); const i = lane ? +lane.dataset.i : -1;
   if (G.phase === 'open') {
     if (i >= 0 && G.players[i].human) openCan(i);
-    else if (S.humans === 1) openCan(0);
+    else if (soloLike()) openCan(0);
     return;
   }
-  if (G.input === 'swipe' && i >= 0 && G.players[i].human) {
+  if (G.online && G.input === 'swipe') { // オンラインは画面のどこをこすってもよい
+    pointers.set(e.pointerId, { i: 0, y: e.clientY });
+  } else if (G.input === 'swipe' && i >= 0 && G.players[i].human) {
     pointers.set(e.pointerId, { i, y: e.clientY });
     try { lane.setPointerCapture(e.pointerId); } catch {}
   }
@@ -691,14 +817,332 @@ const endPtr = e => pointers.delete(e.pointerId);
 $('#scr-game').addEventListener('pointerup', endPtr);
 $('#scr-game').addEventListener('pointercancel', endPtr);
 
+/* ---------- オンライン対戦（Firebase: 匿名ログイン + Firestore の REST） ----------
+   部屋＝ shakeRooms/{id} の1件。部屋を作った人が h（host）、入った人が g（guest）。
+   それぞれ自分の欄だけを書き換え、相手の欄を読みに行く（0.7秒ごと）。
+   st: wait→play→end ／ r: 何戦目 ／ t0: スタート時刻（サーバーの時計, ms）
+   hp/gp: いまの圧力 ／ hd/gd: 飛んだ高さ（-1=まだ） ／ ha/ga: 生きている合図の時刻 ／ hr/gr: 再戦したい回 ／ qw: ランダム待ちの分番号 */
+const NET = (() => {
+  const KEY = 'AIzaSyBxirxHLrhJjH0ACv4Aw_LDFckLVCb97RA';
+  const mock = new URLSearchParams(location.search).get('mock'); // 動作確認用の仮サーバー
+  const ROOT = 'projects/mainichi-lab-games/databases/(default)/documents';
+  const BASE = (mock && /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(mock) ? mock : 'https://firestore.googleapis.com') + '/v1/' + ROOT;
+  const COLL = 'shakeRooms';
+  let auth = store.get('auth', null), offset = 0, bestRtt = 1e9, offAt = 0;
+  const uid = () => (mock ? (sessionStorage.mockUid ||= 'm' + Math.random().toString(36).slice(2, 10)) : auth && auth.uid);
+  async function token() {
+    if (mock) return 'mock';
+    if (auth && auth.exp > Date.now() + 60e3) return auth.token;
+    let r;
+    if (auth && auth.refresh) {
+      r = await fetch(`https://securetoken.googleapis.com/v1/token?key=${KEY}`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(auth.refresh) }).then(x => x.json());
+      if (r.id_token) auth = { uid: r.user_id, token: r.id_token, refresh: r.refresh_token, exp: Date.now() + (+r.expires_in) * 1000 };
+    }
+    if (!r || !r.id_token) {
+      r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${KEY}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"returnSecureToken":true}' }).then(x => x.json());
+      if (!r.idToken) throw new Error('auth');
+      auth = { uid: r.localId, token: r.idToken, refresh: r.refreshToken, exp: Date.now() + (+r.expiresIn) * 1000 };
+    }
+    store.set('auth', auth);
+    return auth.token;
+  }
+  const toFs = v => typeof v === 'string' ? { stringValue: v } : Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+  const fromFs = f => 'stringValue' in f ? f.stringValue : 'integerValue' in f ? +f.integerValue : 'doubleValue' in f ? f.doubleValue : null;
+  const docOf = d => { const o = { _ut: d.updateTime }; for (const [k, v] of Object.entries(d.fields || {})) o[k] = fromFs(v); return o; };
+  const tms = s => Date.parse(String(s).replace(/(\.\d{3})\d+/, '$1'));
+  function sync(serverIso, t0, t1) { // サーバーの時計とのずれを測る（往復が速かった回を信じる）
+    const rtt = t1 - t0, now = Date.now();
+    if (!serverIso || !(rtt < bestRtt + 40 || now - offAt > 30000)) return;
+    bestRtt = Math.min(bestRtt, rtt); offAt = now; offset = tms(serverIso) - (t0 + t1) / 2;
+  }
+  async function call(method, url, body) {
+    const t = await token();
+    const t0 = Date.now();
+    const r = await fetch(url, { method, headers: { Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+    const t1 = Date.now();
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 403) { const e = new Error('denied'); e.denied = true; throw e; }
+    return { ok: r.ok, status: r.status, j, t0, t1 };
+  }
+  return {
+    uid, now: () => Math.round(Date.now() + offset),
+    async get(id) {
+      const { ok, j, t0, t1 } = await call('POST', `${BASE}:batchGet?key=${KEY}`, { documents: [`${ROOT}/${COLL}/${id}`] });
+      if (!ok || !Array.isArray(j) || !j[0]) throw new Error('get');
+      sync(j[0].readTime, t0, t1);
+      return j[0].found ? docOf(j[0].found) : null;
+    },
+    // fields だけを書き換える。cond: {exists:false} か {ut:'更新時刻'}（そのときから変わっていなければ）
+    async patch(id, fields, cond) {
+      let q = Object.keys(fields).map(k => 'updateMask.fieldPaths=' + k).join('&');
+      if (cond && cond.exists === false) q += '&currentDocument.exists=false';
+      if (cond && cond.ut) q += '&currentDocument.updateTime=' + encodeURIComponent(cond.ut);
+      const body = { fields: Object.fromEntries(Object.entries(fields).map(([k, v]) => [k, toFs(v)])) };
+      const { ok, j, t0, t1 } = await call('PATCH', `${BASE}/${COLL}/${id}?key=${KEY}&${q}`, body);
+      if (ok) sync(j.updateTime, t0, t1);
+      return ok ? docOf(j) : null;
+    },
+    async waiting(minutes) { // ランダム対戦で待っている部屋
+      const q = { structuredQuery: { from: [{ collectionId: COLL }], where: { fieldFilter: { field: { fieldPath: 'qw' }, op: 'IN', value: { arrayValue: { values: minutes.map(toFs) } } } }, limit: 10 } };
+      const { ok, j, t0, t1 } = await call('POST', `${BASE}:runQuery?key=${KEY}`, q);
+      if (!ok || !Array.isArray(j)) throw new Error('query');
+      if (j[0]) sync(j[0].readTime, t0, t1);
+      return j.filter(x => x.document).map(x => ({ id: x.document.name.split('/').pop(), ...docOf(x.document) }));
+    },
+    async ready() { await token(); return uid(); },
+  };
+})();
+
+const NICK_A = ['シュワシュワ', 'はじける', 'つめたい', 'あまい', 'すっぱい', 'きらきら', 'ふわふわ', 'げんきな', 'さわやか', 'ごきげん', 'むてきの', 'うわさの', 'でんせつの', 'まよなかの', 'なつまつりの', 'ねむたい', 'すばやい', 'のんびり', 'まっかな', 'ひえひえ'];
+const NICK_B = ['サイダー', 'ソーダ', 'ラムネ', 'レモン', 'メロン', 'グレープ', 'ピーチ', 'オレンジ', 'マスカット', 'ジンジャー', 'ゆず', 'りんご', 'パイン', 'いちご', 'マンゴー', 'キウイ', 'ライチ', 'ミルク', 'コーヒー', 'ココア'];
+let nick = store.get('nick', null);
+if (!Array.isArray(nick) || !NICK_A[nick[0]] || !NICK_B[nick[1]]) { nick = [(Math.random() * NICK_A.length) | 0, (Math.random() * NICK_B.length) | 0]; store.set('nick', nick); }
+const nickName = () => NICK_A[nick[0]] + NICK_B[nick[1]];
+NICK_A.forEach((w, i) => $('#nickA').add(new Option(w, i)));
+NICK_B.forEach((w, i) => $('#nickB').add(new Option(w, i)));
+function syncOnlineUI() {
+  $('#onNick').textContent = nickName(); $('#nickA').value = nick[0]; $('#nickB').value = nick[1];
+  $('#onCfg').textContent = '操作：' + (S.input === 'shake' ? 'スマホをふる' : 'スワイプ');
+  $('#makeNote').textContent = `ふる時間は ${S.sec}秒（せっていで変えられます）`;
+}
+const onNickChange = () => { nick = [+$('#nickA').value, +$('#nickB').value]; store.set('nick', nick); syncOnlineUI(); };
+$('#nickA').onchange = onNickChange; $('#nickB').onchange = onNickChange;
+$('#btnNick').onclick = () => { blip(); $('#nickPick').hidden = !$('#nickPick').hidden; };
+$('#btnOnInput').onclick = () => { blip(); S.input = S.input === 'shake' ? 'swipe' : 'shake'; store.set('input', S.input); syncSettingsUI(); syncOnlineUI(); };
+
+const cleanName = s => String(s || '').slice(0, 20) || 'だれか';
+const minuteOf = t => Math.floor(t / 60000);
+const POLL = { wait: 1500, game: 700, result: 1500 };
+function onMsg(t) { $('#onMsg').textContent = t || ''; }
+function netError(e) {
+  return e && e.denied ? 'オンライン対戦の準備がまだできていません（サーバーの設定待ち）'
+    : '通信できませんでした。電波のよい場所でもう一度ためしてね';
+}
+function lobbyMode(waiting, title, code) {
+  $('#onMenu').hidden = waiting; $('#onWait').hidden = !waiting;
+  $('#waitTitle').textContent = title || '';
+  $('#codeBox').hidden = !code; $('#btnShare').hidden = !code;
+  if (code) $('#codeShow').textContent = code;
+}
+function openLobby(msg) {
+  stopOnline(false);
+  syncOnlineUI(); lobbyMode(false); onMsg(msg); show('online');
+}
+
+// 部屋に入ってから使う：ON = { id, role, op, round, sec, t0, stage, ... }
+function beginRoom(id, role, d) {
+  ON = { id, role, op: role === 'h' ? 'g' : 'h', round: d.r || 0, sec: d.sec || 10, t0: d.t0 || 0, stage: 'wait',
+    myName: nickName(), oppName: '', wins: 0, losses: 0, beatAt: 0, sentD: -1, want: 0, timer: 0, seq: 0, fails: 0, quick: !!d.q, myCreated: d.at || 0 };
+  ON.seq = Math.random();
+  onlineTick(ON.seq);
+}
+function stopOnline(leave) {
+  if (!ON) return;
+  clearTimeout(ON.timer);
+  const o = ON; ON = null;
+  if (leave) NET.patch(o.id, { st: 'end', qw: 0, at: NET.now() }).catch(() => {});
+}
+function startRound(d) {
+  ON.round = d.r; ON.t0 = d.t0; ON.sec = d.sec || 10; ON.sentD = -1; ON.myD = null; ON.want = 0;
+  ON.oppName = cleanName(d[ON.op + 'n']);
+  ON.stage = 'game';
+  audioInit();
+  startGame();
+}
+function onlineSendDistance(v) {
+  if (!ON) return;
+  ON.myD = v;
+  NET.patch(ON.id, { [ON.role + 'd']: v, [ON.role + 'a']: NET.now() }).then(r => { if (r && ON) ON.sentD = v; }).catch(() => {});
+}
+
+async function onlineTick(seq) {
+  if (!ON || ON.seq !== seq) return;
+  const me = ON.role, op = ON.op;
+  try {
+    const now = NET.now();
+    // --- 自分の欄を書く
+    const f = {};
+    if (ON.stage === 'wait') {
+      if (now - ON.beatAt > 5000) { f.at = now; f[me + 'a'] = now; if (ON.quick && me === 'h') f.qw = minuteOf(now); }
+    } else if (ON.stage === 'game' && G && G.online) {
+      if (G.phase === 'shake' || G.phase === 'between') f[me + 'p'] = Math.round(G.players[0].pressure * 1000) / 1000;
+      if (ON.myD != null && ON.sentD !== ON.myD) f[me + 'd'] = ON.myD;
+      if (Object.keys(f).length || now - ON.beatAt > 3000) f[me + 'a'] = now;
+    } else if (ON.stage === 'result') {
+      if (now - ON.beatAt > 3000) f[me + 'a'] = now;
+    }
+    if (Object.keys(f).length) {
+      const r = await NET.patch(ON.id, f);
+      if (!ON || ON.seq !== seq) return;
+      if (r) { ON.beatAt = now; if (f[me + 'd'] != null) ON.sentD = f[me + 'd']; }
+    }
+    // --- 部屋を読む
+    const d = await NET.get(ON.id);
+    if (!ON || ON.seq !== seq) return;
+    ON.fails = 0;
+    await handleRoom(d);
+    if (!ON || ON.seq !== seq) return;
+    // ランダム待ちのときは、ほかに待っている人がいないかも探す（両方が待ち続けないように）
+    if (ON.stage === 'wait' && ON.quick && Date.now() - (ON.lookAt || 0) > 4000) { ON.lookAt = Date.now(); await quickLook(seq); }
+  } catch (e) {
+    if (!ON || ON.seq !== seq) return;
+    if (e && e.denied) { const st = ON.stage; stopOnline(false); if (st === 'wait') openLobby(netError(e)); else toast(netError(e)); return; }
+    if (++ON.fails === 4) toast('通信が不安定です…');
+  }
+  if (ON && ON.seq === seq) ON.timer = setTimeout(() => onlineTick(seq), POLL[ON.stage] || 1500);
+}
+
+async function handleRoom(d) {
+  const op = ON.op, now = NET.now();
+  if (!d) { if (ON.stage === 'wait') openLobby('部屋がなくなりました'); return; }
+  if (ON.stage === 'wait') {
+    if (d.st === 'play' && d.r > ON.round) startRound(d);
+    else if (d.st === 'end') openLobby('部屋が閉じられました');
+    return;
+  }
+  const gone = d.st === 'end' || (d[op + 'a'] && now - d[op + 'a'] > 15000);
+  if (ON.stage === 'game' && G && G.online) {
+    const rp = G.players[1];
+    if (typeof d[op + 'p'] === 'number') rp.netP = clamp(d[op + 'p'], 0, 1);
+    if (typeof d[op + 'd'] === 'number' && d[op + 'd'] >= 0) rp.netD = clamp(d[op + 'd'], 0, MAX_M);
+    if (gone && !rp.gone) { rp.gone = true; ON.gone = true; toast(d.st === 'end' ? 'あいてが ぬけました' : 'あいてとの通信が切れました'); }
+    return;
+  }
+  if (ON.stage === 'result') {
+    if (d.r > ON.round && d.st === 'play') { startRound(d); return; }
+    if (gone) { if (!ON.gone) { ON.gone = true; $('#resNote').textContent = 'あいてが ぬけました'; $('#btnAgain').textContent = 'ロビーへ'; } return; }
+    const wantMe = d[ON.role + 'r'] === ON.round + 1, wantOp = d[op + 'r'] === ON.round + 1;
+    if (wantOp && !wantMe) $('#resNote').textContent = 'あいてが「もう一回」を待っています！';
+    // 二人そろったら、部屋を作った人が次の回を始める
+    if (wantMe && wantOp && ON.role === 'h') {
+      await NET.patch(ON.id, { r: ON.round + 1, t0: NET.now() + 3500, hp: 0, gp: 0, hd: -1, gd: -1, st: 'play' });
+    }
+  }
+}
+
+function newRoomFields(quick) {
+  const now = NET.now();
+  return { st: 'wait', q: quick ? 1 : 0, qw: quick ? minuteOf(now) : 0, h: NET.uid(), hn: nickName(), g: '', gn: '', sec: quick ? 10 : S.sec,
+    r: 0, t0: 0, hp: 0, gp: 0, hd: -1, gd: -1, hr: 0, gr: 0, ha: now, ga: 0, at: now };
+}
+function joinFields(d) {
+  const now = NET.now();
+  return { g: NET.uid(), gn: nickName(), ga: now, st: 'play', r: (d.r || 0) + 1, t0: now + 3500, qw: 0, at: now, hp: 0, gp: 0, hd: -1, gd: -1 };
+}
+
+async function quickMatch() {
+  onMsg(''); lobbyMode(true, '相手をさがしています…');
+  try {
+    await NET.ready();
+    if (await quickLook(null)) return;
+    // だれもいなければ自分が部屋を作って待つ
+    const id = 'q' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const d = await NET.patch(id, newRoomFields(true), { exists: false });
+    if (!d) throw new Error('create');
+    if ($('#onWait').hidden) { NET.patch(id, { st: 'end', qw: 0 }).catch(() => {}); return; } // 待つ間に「やめる」が押された
+    beginRoom(id, 'h', d);
+  } catch (e) { lobbyMode(false); onMsg(netError(e)); }
+}
+// 待っている部屋に入る。seq があるときは「自分も待っている」場合（重ならないよう uid の小さい方の部屋に入る）
+async function quickLook(seq) {
+  const now = NET.now(), m = minuteOf(now);
+  const list = await NET.waiting([m, m - 1]);
+  const me = NET.uid();
+  for (const d of list.sort((a, b) => a.at - b.at)) {
+    if (d.id === (ON && ON.id) || d.h === me || d.st !== 'wait') continue;
+    if (now - d.at > 20000) continue;
+    if (seq != null && !(d.h < me)) continue;
+    const r = await NET.patch(d.id, joinFields(d), { ut: d._ut });
+    if (!r) continue; // 先にほかの人が入った
+    if (seq != null) { if (!ON || ON.seq !== seq) return true; const old = ON.id; stopOnline(false); NET.patch(old, { st: 'end', qw: 0 }).catch(() => {}); }
+    if ($('#onWait').hidden && seq == null) { NET.patch(d.id, { st: 'end' }).catch(() => {}); return true; }
+    beginRoom(d.id, 'g', { ...d, ...r, r: (d.r || 0) });
+    return true;
+  }
+  return false;
+}
+
+async function makeRoom() {
+  onMsg(''); lobbyMode(true, '友だちを待っています…');
+  try {
+    await NET.ready();
+    for (let k = 0; k < 8; k++) {
+      const code = String(1000 + ((Math.random() * 9000) | 0));
+      const id = 'f' + code;
+      let d = await NET.patch(id, newRoomFields(false), { exists: false });
+      if (!d) { // 使われた番号：30分以上たった部屋なら上書きしてよい
+        const old = await NET.get(id);
+        if (old && NET.now() - (old.at || 0) > 30 * 60000) d = await NET.patch(id, newRoomFields(false), { ut: old._ut });
+      }
+      if (!d) continue;
+      if ($('#onWait').hidden) { NET.patch(id, { st: 'end' }).catch(() => {}); return; }
+      lobbyMode(true, '友だちを待っています…', code);
+      beginRoom(id, 'h', d);
+      return;
+    }
+    throw new Error('code');
+  } catch (e) { lobbyMode(false); onMsg(netError(e)); }
+}
+
+async function joinRoom() {
+  const code = $('#codeIn').value.replace(/\D/g, '');
+  $('#btnJoin').classList.remove('hot');
+  if (code.length !== 4) { onMsg('4けたの番号を入れてね'); return; }
+  onMsg('さがしています…');
+  try {
+    await NET.ready();
+    const id = 'f' + code;
+    const d = await NET.get(id);
+    if (!d || d.st === 'end' || NET.now() - (d.at || 0) > 30 * 60000) { onMsg('その番号の部屋が見つかりません'); return; }
+    if (d.st !== 'wait' || d.h === NET.uid()) { onMsg('その部屋は もう対戦中です'); return; }
+    const r = await NET.patch(id, joinFields(d), { ut: d._ut });
+    if (!r) { onMsg('入れませんでした。もう一度ためしてね'); return; }
+    onMsg(''); lobbyMode(true, 'まもなく スタート！');
+    beginRoom(id, 'g', { ...d, r: d.r || 0 });
+  } catch (e) { onMsg(netError(e)); }
+}
+
+const prepGesture = () => { audioInit(); ensureMotion(); blip(); };
+$('#btnOnline').onclick = () => { audioInit(); blip(); openLobby(''); };
+$('#btnOnBack').onclick = () => { blip(); stopOnline(true); show('title'); };
+$('#btnQuick').onclick = () => { prepGesture(); quickMatch(); };
+$('#btnMake').onclick = () => { prepGesture(); makeRoom(); };
+$('#btnJoin').onclick = () => { prepGesture(); joinRoom(); };
+$('#codeIn').addEventListener('keydown', e => { if (e.key === 'Enter') $('#btnJoin').click(); });
+$('#btnCancel').onclick = () => { blip(); stopOnline(true); lobbyMode(false); onMsg(''); };
+$('#btnShare').onclick = async () => {
+  blip();
+  const url = location.origin + location.pathname + '?room=' + $('#codeShow').textContent;
+  const text = `シェイク・フィーバーで対戦しよう！ 部屋の番号は ${$('#codeShow').textContent}`;
+  try {
+    if (navigator.share) await navigator.share({ title: 'シェイク・フィーバー', text, url });
+    else { await navigator.clipboard.writeText(text + '\n' + url); toast('さそう文をコピーしました'); }
+  } catch {}
+};
+// 友だちから届いたリンク（?room=1234）で開いたとき
+{
+  const code = (new URLSearchParams(location.search).get('room') || '').replace(/\D/g, '').slice(0, 4);
+  if (code.length === 4) { openLobby('番号が入っています。「入る」を押してね'); $('#codeIn').value = code; $('#btnJoin').classList.add('hot'); }
+}
+
 /* ---------- ボタン ---------- */
 $('#btnStart').onclick = () => { audioInit(); blip(); show('howto'); };
 $('#btnGo').onclick = () => { audioInit(); ensureMotion(); blip(); startGame(); };
 $('#btnGear').onclick = $('#btnCfg').onclick = () => { audioInit(); blip(); $('#settings').hidden = false; };
-$('#btnCloseSet').onclick = () => { blip(); $('#settings').hidden = true; };
-$('#btnResult').onclick = () => { blip(); buildResult(); show('result'); };
-$('#btnAgain').onclick = () => { audioInit(); ensureMotion(); blip(); startGame(); };
-$('#btnHome').onclick = () => { blip(); S.token++; fizzStop(); show('title'); };
+$('#btnCloseSet').onclick = () => { blip(); $('#settings').hidden = true; syncOnlineUI(); };
+$('#btnResult').onclick = () => { blip(); if (ON) ON.stage = 'result'; buildResult(); show('result'); };
+$('#btnAgain').onclick = () => {
+  audioInit(); ensureMotion(); blip();
+  if (G && G.online) {
+    if (!ON || ON.gone) { openLobby(''); return; }
+    ON.want = ON.round + 1;
+    $('#resNote').textContent = 'あいての返事を待っています…';
+    NET.patch(ON.id, { [ON.role + 'r']: ON.want, [ON.role + 'a']: NET.now() }).catch(() => toast(netError()));
+    return;
+  }
+  startGame();
+};
+$('#btnHome').onclick = () => { blip(); S.token++; fizzStop(); if (G && G.online) { stopOnline(true); G = null; } show('title'); };
 
 /* ---------- 演出キャンバス ---------- */
 const cv = $('#fx'), ctx = cv.getContext('2d');
@@ -737,15 +1181,23 @@ function updateGame(now, dt) {
       } else { showBig(String(sec), 'num'); tone(660, 0.08); }
     }
     for (const p of G.players) {
-      if (!p.human && !p.cpuDone) p.energy += p.cpuRate * dt * (0.55 + 0.9 * Math.abs(Math.sin(now / 170 + p.idx * 1.7)));
+      if (!p.human && !p.remote && !p.cpuDone) p.energy += p.cpuRate * dt * (0.55 + 0.9 * Math.abs(Math.sin(now / 170 + p.idx * 1.7)));
     }
     if (left <= 0 && G.onShakeEnd) { const r = G.onShakeEnd; G.onShakeEnd = null; r(); }
   }
   let loud = 0;
   for (const p of G.players) {
-    const rate = (p.energy - p.lastE) / Math.max(dt, 0.001); p.lastE = p.energy;
-    p.int = p.int * 0.82 + clamp(rate / 22, 0, 1) * 0.18;
-    if (!p.opened) p.pressure = pressureOf(p.energy);
+    if (p.remote) {
+      // 相手：ネットで届いた圧力に なめらかに近づける。増えている間はガタガタ揺らす
+      const prev = p.pressure;
+      if (!p.opened) p.pressure += (p.netP - p.pressure) * Math.min(1, dt * 3);
+      const rising = G.phase === 'shake' && p.netP > prev + 0.0005;
+      p.int = p.int * 0.9 + (rising ? 0.7 : 0) * 0.1;
+    } else {
+      const rate = (p.energy - p.lastE) / Math.max(dt, 0.001); p.lastE = p.energy;
+      p.int = p.int * 0.82 + clamp(rate / 22, 0, 1) * 0.18;
+      if (!p.opened) p.pressure = pressureOf(p.energy);
+    }
     p.fillEl.style.height = (p.pressure * 100).toFixed(1) + '%';
     let k = p.int, t = now / 1000;
     if (p.opened) k = Math.max(0, 0.6 - (now - p.openAt) / 1500);
@@ -762,7 +1214,8 @@ function updateGame(now, dt) {
     const el = (now - G.openStart) / 1000;
     for (const p of G.players) {
       if (p.opened) continue;
-      if (!p.human && el > p.cpuOpen) openCan(p.idx);
+      if (p.remote) { if (p.netD >= 0) openCan(p.idx, p.netD); else if (p.gone) { p.forfeit = true; openCan(p.idx, 0); } }
+      else if (!p.human && el > p.cpuOpen) openCan(p.idx);
       else if (p.human && el > 6) openCan(p.idx);
     }
     if (G.revealAt && now > G.revealAt) reveal();
@@ -813,7 +1266,7 @@ function drawSpray(now, dt) {
   }
   G.players.forEach((p, i) => {
     if (!p.opened) return;
-    const n = noz[i], col = COLORS[i];
+    const n = noz[i], col = p.col;
     const t = (now - p.openAt) / 1000;
     const rise = 1 - Math.pow(1 - clamp(t / 1.3, 0, 1), 3);
     const fall = clamp((t - 2.8) / 1.4, 0, 1);
