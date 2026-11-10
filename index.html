@@ -252,7 +252,7 @@ button:focus-visible{outline:4px solid #fff;outline-offset:3px}
     <div class="logo">
       <div class="t1 pop">シェイク・</div>
       <div class="t2 pop">フィーバー<span class="bang">!</span></div>
-      <div class="ribbon">ふって！あけて！どこまで飛ぶ!?</div>
+      <div class="ribbon">ふって！あけて！高得点をねらえ!</div>
     </div>
     <div class="hero" id="hero"></div>
     <div class="title-foot">
@@ -303,10 +303,10 @@ button:focus-visible{outline:4px solid #fff;outline-offset:3px}
         <div><h3 id="step1h">10秒間、上下にふろう！</h3><p id="step1p">スマホを缶に見立てて、ひたすら上下にふります。強く速くふるほど圧力がたまります。</p></div>
         <div class="illo" id="illo1"></div></div>
       <div class="step"><div class="no">2</div>
-        <div><h3>フタをあけよう！</h3><p id="step2p">10秒たったら、自分の缶をタップしてフタを開けます。</p></div>
+        <div><h3>「今だ！」でフタをあけよう！</h3><p id="step2p">10秒たったら、自分の缶をタップしてフタを開けます。</p></div>
         <div class="illo" id="illo2"></div></div>
       <div class="step"><div class="no">3</div>
-        <div><h3>どれだけ飛ぶか競おう！</h3><p>ジュースの噴き出す高さ（最高5.0m）で順位が決まります。</p></div>
+        <div><h3>点数で競おう！</h3><p>ふった強さの<b>パワー点</b>（最高700）＋合図からの速さの<b>はやさ点</b>（最高300）。1000点満点！</p></div>
         <div class="illo" id="illo3"></div></div>
       <div class="cfg"><span id="cfgText"></span><button id="btnCfg">設定を変える</button></div>
       <p class="note" id="safety">スマホはしっかり握って！まわりに人や物がないか確認しよう</p>
@@ -409,7 +409,7 @@ const COLORS = [
   { c:'#ffb81c', d:'#c47400', foam:'#fff4c9' },
 ];
 let SHAKE_SEC = 10;
-const MAX_M = 5;
+const MAX_PT = 1000; // 1回の最高点
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const rand = (a, b) => a + Math.random() * (b - a);
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -496,7 +496,7 @@ function syncSettingsUI() {
   $('#step1h').textContent = shake ? `${S.sec}秒間、上下にふろう！` : `${S.sec}秒間、上下にこすろう！`;
   $('#step1p').textContent = shake ? 'スマホを缶に見立てて、ひたすら上下にふります。強く速くふるほど圧力がたまります。'
     : '自分のレーンを指でひたすら上下にこすります。速く大きく動かすほど圧力がたまります。';
-  $('#step2p').textContent = shake && S.humans === 1 ? `${S.sec}秒たったら、画面をタップするか手首をひねってフタを開けます。` : `${S.sec}秒たったら、自分の缶をタップしてフタを開けます。`;
+  $('#step2p').textContent = (shake && S.humans === 1 ? '「今だ！」の合図が出たら、画面をタップするか手首をひねってフタを開けます。' : '「今だ！」の合図が出たら、自分の缶をタップしてフタを開けます。') + '速いほど高得点。合図より前はフライングで減点！';
   $('#safety').hidden = !shake;
 }
 function bindSeg(sel, fn) {
@@ -617,7 +617,7 @@ function buildLanes() {
     lane.innerHTML = `<div class="lane-head">${p.tag}</div>
       <div class="can-wrap"><div class="can"></div><div class="tap-bubble">タップ!</div></div>
       <div class="gauge"><div class="fill"></div><div class="ticks"></div></div>
-      <div class="podium"><b class="rk">?</b><span class="dist">--m</span></div>`;
+      <div class="podium"><b class="rk">?</b><span class="dist">--点</span></div>`;
     lanesEl.appendChild(lane);
     p.el = lane; p.canEl = lane.querySelector('.can'); p.fillEl = lane.querySelector('.fill');
     p.face = ''; setFace(p, 'idle');
@@ -647,7 +647,7 @@ async function startGame() {
         const human = i < S.humans;
         const target = rand(0.42, 0.86);
         return { ...base, idx: i, col: COLORS[i], human, tag: human ? `${i + 1}P` : 'COM', name: human ? `プレイヤー${i + 1}` : `COM${i + 1 - S.humans}`,
-          cpuRate: -12 * Math.log(1 - target), cpuOpen: rand(0.5, 1.6) };
+          cpuRate: -12 * Math.log(1 - target), cpuOpen: rand(1.2, 2.4), cpuRt: rand(0.28, 0.75), cpuFoul: Math.random() < 0.08 };
       }),
   };
   // オンラインでは「自分＝0番」。色は部屋を作った人が赤、入った人が青
@@ -721,11 +721,24 @@ async function openPhase(tok) {
   G.phase = 'open'; G.openStart = performance.now();
   flash();
   const g = $('#scr-game'); g.classList.add('spray'); g.classList.remove('fever');
+  G.goAt = 0;
+  $('#phaseLabel').textContent = '合図をまて…';
+  showBig('かまえて…', 'word'); tone(784, 0.1);
+  setHint('「今だ！」の合図で フタを開けよう！ 早すぎるとフライング！');
+  for (const p of G.players) {
+    p.pressure = pressureOf(p.energy); p.el.classList.toggle('need-open', p.human); p.int = 0;
+    p.el.querySelector('.tap-bubble').textContent = 'まって…';
+  }
+  // 合図までの時間はランダム（オンラインは二人とも同じ）
+  const delay = 1900 + (G.online ? ON.t0 % 1800 : rand(0, 1800));
+  await wait(delay); if (tok !== S.token || G.phase !== 'open') return;
+  G.goAt = performance.now();
+  flash(); vibrate(80);
   $('#phaseLabel').textContent = 'フタをあけて！';
-  showBig('フタをあけて！', 'word'); tone(784, 0.1); tone(1175, 0.2, 'square', 0.15, 0.1);
-  setHint(G.input === 'shake' && soloLike() ?'画面をタップ か 手首をひねって フタを開けよう！' : '自分の缶をタップして フタを開けよう！');
-  for (const p of G.players) { p.pressure = pressureOf(p.energy); p.el.classList.toggle('need-open', p.human); p.int = 0; }
-  await wait(1100); if (tok !== S.token) return;
+  showBig('今だ！', 'word'); tone(1175, 0.2, 'square', 0.18);
+  setHint(G.input === 'shake' && soloLike() ? '画面をタップ か 手首をひねって 開けろ！' : '自分の缶をタップして 開けろ！');
+  for (const p of G.players) p.el.querySelector('.tap-bubble').textContent = '今だ！';
+  await wait(900); if (tok !== S.token) return;
   if (G.phase === 'open') showBig(null, '');
 }
 
@@ -733,10 +746,17 @@ function openCan(i, fixed) {
   const p = G.players[i];
   if (!p || p.opened || G.phase !== 'open') return;
   p.opened = true; p.openAt = performance.now();
-  if (fixed != null) p.distance = fixed; // 相手の記録（ネットで届いた値）
+  if (fixed != null) p.distance = fixed; // 相手の点数（ネットで届いた値）
   else {
-    p.distance = Math.max(0.1, Math.round((0.2 + 4.8 * p.pressure + rand(-0.06, 0.06)) * 10) / 10);
-    p.distance = Math.min(MAX_M, p.distance);
+    // パワー点（ふった強さ 最高700）＋ はやさ点（「今だ！」からの速さ 最高300）。合図より前はフライング
+    p.power = Math.round(700 * p.pressure);
+    if (!G.goAt) { p.foul = true; p.power = Math.round(p.power * 0.6); p.speed = 0; }
+    else { p.rt = (p.openAt - G.goAt) / 1000; p.speed = Math.round(300 * clamp(1 - (p.rt - 0.2) / 0.8, 0, 1)); }
+    p.distance = clamp(p.power + p.speed, 0, MAX_PT);
+  }
+  if (p.human && G.phase === 'open') {
+    if (p.foul) { showBig('フライング！', 'word warn'); tone(180, 0.3, 'sawtooth', 0.15); }
+    else if (p.speed >= 250 && soloLike()) showBig('はやい！', 'word');
   }
   if (G.online && p.human) onlineSendDistance(p.distance);
   p.el.classList.remove('need-open');
@@ -755,7 +775,7 @@ function reveal() {
   sorted.forEach((p, k) => { p.rank = k > 0 && p.distance === sorted[k - 1].distance ? sorted[k - 1].rank : k + 1; });
   for (const p of G.players) {
     p.el.querySelector('.rk').textContent = `${p.rank}位`;
-    p.el.querySelector('.dist').textContent = `${p.distance.toFixed(1)}m`;
+    p.el.querySelector('.dist').textContent = `${p.distance}点`;
   }
   showBig(null, '');
   fanfare();
@@ -768,7 +788,7 @@ function buildResult() {
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   $('#resList').innerHTML = sorted.map(p => `<li style="--c:${p.col.c}">
     <span class="rb">${p.rank}位</span><span class="mini">${canSVG(p.col, p.rank === 1 ? 'happy' : 'idle', true)}</span>
-    <span class="nm">${esc(p.name)}<small>${p.tag}</small></span><span class="d">${p.distance.toFixed(1)}<small>m</small></span></li>`).join('');
+    <span class="nm">${esc(p.name)}<small>${p.power != null ? (p.foul ? "フライング！" : `パワー${p.power}<br>はやさ${p.speed}`) : p.tag}</small></span><span class="d">${p.distance}<small>点</small></span></li>`).join('');
   const top = sorted[0];
   if (G.online) {
     const me = G.players[0], op = G.players[1];
@@ -783,12 +803,12 @@ function buildResult() {
     $('#btnAgain').textContent = 'もう一回!';
   }
   $('#bestCan').innerHTML = canSVG(top.col, 'happy', true);
-  $('#bestVal').innerHTML = `${top.distance.toFixed(1)}<small>m</small>`;
+  $('#bestVal').innerHTML = `${top.distance}<small>点</small>`;
   const humanBest = Math.max(...G.players.filter(p => p.human).map(p => p.distance));
-  const record = store.get('best', 0);
+  const record = store.get('bestPt', 0);
   const sub = $('#bestSub');
-  if (humanBest > record) { store.set('best', humanBest); sub.textContent = `新記録！ あなたの最高 ${humanBest.toFixed(1)}m`; sub.className = 'sub new'; }
-  else { sub.textContent = `これまでの最高記録 ${record.toFixed(1)}m`; sub.className = 'sub'; }
+  if (humanBest > record) { store.set('bestPt', humanBest); sub.textContent = `新記録！ あなたの最高 ${humanBest}点`; sub.className = 'sub new'; }
+  else { sub.textContent = `これまでの最高記録 ${record}点`; sub.className = 'sub'; }
 }
 
 /* ---------- 入力（スワイプ・タップ） ---------- */
@@ -1004,7 +1024,7 @@ async function handleRoom(d) {
   if (ON.stage === 'game' && G && G.online) {
     const rp = G.players[1];
     if (typeof d[op + 'p'] === 'number') rp.netP = clamp(d[op + 'p'], 0, 1);
-    if (typeof d[op + 'd'] === 'number' && d[op + 'd'] >= 0) rp.netD = clamp(d[op + 'd'], 0, MAX_M);
+    if (typeof d[op + 'd'] === 'number' && d[op + 'd'] >= 0) rp.netD = Math.round(clamp(d[op + 'd'], 0, MAX_PT));
     if (gone && !rp.gone) { rp.gone = true; ON.gone = true; toast(d.st === 'end' ? 'あいてが ぬけました' : 'あいてとの通信が切れました'); }
     return;
   }
@@ -1215,8 +1235,11 @@ function updateGame(now, dt) {
     for (const p of G.players) {
       if (p.opened) continue;
       if (p.remote) { if (p.netD >= 0) openCan(p.idx, p.netD); else if (p.gone) { p.forfeit = true; openCan(p.idx, 0); } }
-      else if (!p.human && el > p.cpuOpen) openCan(p.idx);
-      else if (p.human && el > 6) openCan(p.idx);
+      else if (!p.human) {
+        if (!G.goAt) { if (p.cpuFoul && el > p.cpuOpen) openCan(p.idx); }
+        else if (now - G.goAt > p.cpuRt * 1000) openCan(p.idx);
+      }
+      else if (G.goAt && now - G.goAt > 3000) openCan(p.idx);
     }
     if (G.revealAt && now > G.revealAt) reveal();
   }
@@ -1258,11 +1281,11 @@ function drawSpray(now, dt) {
   const maxH = Math.max(40, baseY - ceil);
   // 目盛り（0〜5m）
   ctx.font = `800 11px ${FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  for (let m = 1; m <= MAX_M; m++) {
-    const y = baseY - (m / MAX_M) * maxH;
+  for (let m = 1; m <= 5; m++) {
+    const y = baseY - (m / 5) * maxH;
     ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 6]);
-    ctx.beginPath(); ctx.moveTo(26, y); ctx.lineTo(W - 4, y); ctx.stroke(); ctx.setLineDash([]);
-    ctx.lineWidth = 3; ctx.strokeStyle = NAVY; ctx.strokeText(`${m}m`, 3, y); ctx.fillStyle = '#fff'; ctx.fillText(`${m}m`, 3, y);
+    ctx.beginPath(); ctx.moveTo(32, y); ctx.lineTo(W - 4, y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.lineWidth = 3; ctx.strokeStyle = NAVY; ctx.strokeText(`${m * 200}`, 3, y); ctx.fillStyle = '#fff'; ctx.fillText(`${m * 200}`, 3, y);
   }
   G.players.forEach((p, i) => {
     if (!p.opened) return;
@@ -1270,7 +1293,7 @@ function drawSpray(now, dt) {
     const t = (now - p.openAt) / 1000;
     const rise = 1 - Math.pow(1 - clamp(t / 1.3, 0, 1), 3);
     const fall = clamp((t - 2.8) / 1.4, 0, 1);
-    const target = (p.distance / MAX_M) * maxH;
+    const target = (p.distance / MAX_PT) * maxH;
     const h = target * rise * (1 - 0.88 * fall) * (1 + 0.025 * Math.sin(t * 22 + i));
     const topY = n.y - h;
     const bw = n.w * 0.13, tw = n.w * (0.22 + 0.06 * Math.sin(t * 17 + i));
@@ -1292,11 +1315,12 @@ function drawSpray(now, dt) {
         r: rand(2, 5.5), life: rand(0.7, 1.4), col: Math.random() < 0.5 ? '#fff' : col.foam });
     }
     // 高さ表示
-    const shown = p.distance * rise;
+    const shown = Math.round(p.distance * rise);
     ctx.font = `900 ${Math.round(n.w * 0.26)}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
     ctx.lineWidth = 5; ctx.strokeStyle = NAVY; ctx.lineJoin = 'round';
     const ly = Math.max(ceil - 4, topY - tw - 4);
-    ctx.strokeText(`${shown.toFixed(1)}m`, n.x, ly); ctx.fillStyle = '#fff'; ctx.fillText(`${shown.toFixed(1)}m`, n.x, ly);
+    ctx.strokeText(`${shown}点`, n.x, ly); ctx.fillStyle = '#fff'; ctx.fillText(`${shown}点`, n.x, ly);
+    if (p.foul) { const y2 = ly - n.w * 0.28; ctx.font = `900 ${Math.round(n.w * 0.17)}px ${FONT}`; ctx.lineWidth = 4; ctx.strokeText('フライング', n.x, y2); ctx.fillStyle = '#fff27a'; ctx.fillText('フライング', n.x, y2); }
   });
 }
 
